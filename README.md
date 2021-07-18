@@ -39,17 +39,17 @@ public async void Form1_Load(object sender, EventArgs e)
     // registar for callback function (gettting currentTrackInfo.) 
     spotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
 
-    if (_SpotifyService.IsExistCredentialFile())
+    if (spotifyService.IsExistCredentialFile())
     {
-        await _SpotifyService.Initialize();
-        await _SpotifyService.Start().ConfigureAwait(false);
+        await spotifyService.Initialize();
+        await spotifyService.Start().ConfigureAwait(false);
     }
 
     // Be sure to explicitly initialize.
     _OnSpotifyCurrentlyPlayingChanged(_CurrentTrackInfo);
 
     // Getting and Setting Spotify current playing track albumart. 
-    var accountImageStream = await _SpotifyService.GetUserImageStream();
+    var accountImageStream = await spotifyService.GetUserImageStream();
     AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
 }
 ```
