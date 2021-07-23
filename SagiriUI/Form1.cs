@@ -8,6 +8,7 @@ using System.Windows.Forms;
 using Sagiri.Services.Spotify;
 using Sagiri.Services.Spotify.Track;
 using SagiriUI.Properties;
+using Twist;
 
 namespace SagiriUI
 {
@@ -22,7 +23,7 @@ namespace SagiriUI
         private static readonly string _at = "";
         private static readonly string _ats = "";
 
-        public Twist.Twitter Twist { get; private set; }
+        private Twitter _Twist { get; set; }
         private Point _MousePoint { get; set; }
 
         public Form1() => InitializeComponent();
@@ -31,7 +32,7 @@ namespace SagiriUI
         {
             _SpotifyService = new();
             _CurrentTrackInfo = new CurrentTrackInfo();
-            Twist = new Twist.Twitter(_ck, _cs, _at, _ats, new HttpClient(new HttpClientHandler()));
+            _Twist = new Twitter(_ck, _cs, _at, _ats, new HttpClient(new HttpClientHandler()));
 
             _SpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
 
@@ -79,7 +80,7 @@ namespace SagiriUI
 
             using var client = new System.Net.WebClient();
             using var stream = new System.IO.MemoryStream(client.DownloadData(_CurrentTrackInfo.ArtworkUrl));
-            await Twist.UpdateWithMediaAsync(tw.ToString(), stream);
+            await _Twist.UpdateWithMediaAsync(tw.ToString(), stream);
         }
 
         private void ClosePanel_Click(object sender, EventArgs e)
