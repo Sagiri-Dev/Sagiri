@@ -72,10 +72,10 @@ namespace Sagiri.Services.Spotify
             _spotifyClient = _spotifyAuthenticator.SpotifyClient;
             _CurrentlyPlaying = await _spotifyClient?.Player.GetCurrentlyPlaying(new());
 
-            // Rx で曲情報の取得、購読先へ通知まで一括実施
-            // 重複する情報はストリームに放流しない
+            // Get song information and subscribe with Rx.
+            // Do not release duplicate information to the stream.
             Observable.Interval(TimeSpan.FromSeconds(1))
-                .Select(async _ => _CurrentlyPlaying = await _spotifyClient?.Player.GetCurrentlyPlaying(new()))
+                .Select(async _ => _CurrentlyPlaying = await _spotifyClient?.Player?.GetCurrentlyPlaying(new()))
                 .Where(_ => _CurrentlyPlaying.IsPlaying)
                 .Select(_ => CurrentTrackInfo.GetCurrentTrackInfo(_CurrentlyPlaying))
                 .DistinctUntilChanged()
