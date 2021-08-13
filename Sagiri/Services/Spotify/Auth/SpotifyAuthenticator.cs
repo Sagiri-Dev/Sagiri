@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
 using System.Threading.Tasks;
-
-using Sagiri.Exceptions;
-using Sagiri.Util;
 
 using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
+
+using Sagiri.Exceptions;
+using Sagiri.Util;
 
 using static Sagiri.Util.Common.Constants;
 
@@ -19,7 +18,6 @@ namespace Sagiri.Services.Spotify.Auth
         private static JsonConfig _json = new();
 
         private static EmbedIOAuthServer _Server { get; set; }
-        private static HttpClient _Client { get; set; }
         private string _Challenge { get; set; }
         private string _Verifier { get; set; }
 
@@ -29,7 +27,6 @@ namespace Sagiri.Services.Spotify.Auth
         internal SpotifyAuthenticator()
         {
             (_Verifier, _Challenge) = PKCEUtil.GenerateCodes(120);
-            _Client = new HttpClient(new HttpClientHandler());
         }
 
         internal async Task Initialize()
@@ -60,11 +57,11 @@ namespace Sagiri.Services.Spotify.Auth
                 await _json.SaveTokenAsync();
 
                 if (_json.IsNullOrEmpty())
-                    throw new SagiriException("Configuration any records of null or empty. please check your tokens info.");
+                    throw new Exception();
             }
             catch (Exception)
             {
-                throw new SagiriException("Exception is _PreAuthentication()");
+                throw new SagiriException("Configuration any records of null or empty. please check your tokens info.");
             }
         }
 
@@ -81,7 +78,7 @@ namespace Sagiri.Services.Spotify.Auth
 
                 OAuthClient client = new();
                 var tokenResponse = await client.RequestToken(new PKCETokenRequest(_json.ClientId, response.Code, RedirectUri, _Verifier));
-                var authenticator = new PKCEAuthenticator(_json.ClientId, tokenResponse);
+                PKCEAuthenticator authenticator = new(_json.ClientId, tokenResponse);
 
                 var config = SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator);
                 IsAuthorizationCodeReceived = true;

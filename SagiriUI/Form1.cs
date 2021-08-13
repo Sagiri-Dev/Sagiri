@@ -34,19 +34,22 @@ namespace SagiriUI
             _CurrentTrackInfo = new CurrentTrackInfo();
             _Twist = new Twitter(_ck, _cs, _at, _ats, new HttpClient(new HttpClientHandler()));
 
-            _SpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
-
+            await _SpotifyService.Initialize();
             if (_SpotifyService.IsExistCredentialFile())
             {
-                await _SpotifyService.Initialize();
+                _SpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
+
                 await _SpotifyService.Start().ConfigureAwait(false);
+                _OnSpotifyCurrentlyPlayingChanged(_CurrentTrackInfo);
+
+                var accountImageStream = await _SpotifyService.GetUserImageStream();
+                AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
+            } 
+            else
+            {
+                MessageBox.Show("Spotify tokens file not found...");
+                this.Close();
             }
-
-            // 初回のみ明示的に初期化
-            _OnSpotifyCurrentlyPlayingChanged(_CurrentTrackInfo);
-
-            var accountImageStream = await _SpotifyService.GetUserImageStream();
-            AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)

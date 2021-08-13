@@ -2,17 +2,17 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
+using SpotifyAPI.Web;
+
 using Sagiri.Services.Spotify.Auth;
 using Sagiri.Services.Spotify.Interfaces;
-using Sagiri.Services.Spotify.Player.Enum;
+using Sagiri.Services.Spotify.Player.Interfaces;
 using Sagiri.Services.Spotify.Track;
+using Sagiri.Services.Spotify.User.Interfaces;
 using Sagiri.Util.Common;
-
-using SpotifyAPI.Web;
 
 namespace Sagiri.Services.Spotify
 {
@@ -22,6 +22,10 @@ namespace Sagiri.Services.Spotify
 
         private static SpotifyClient _spotifyClient;
         private readonly SpotifyAuthenticator _spotifyAuthenticator;
+
+        private IUser _IUser { get; set; }
+        private IPlayer _IPlayer { get; set; }
+
         private CurrentlyPlaying _CurrentlyPlaying { get; set; }
 
         #endregion Field / Members
@@ -34,44 +38,35 @@ namespace Sagiri.Services.Spotify
 
         #region Constructor
 
-        public SpotifyService()
-        {
-            _ExecuteSpotify();
-            _spotifyAuthenticator = new();
-        }
+        public SpotifyService() => _spotifyAuthenticator = new();
 
         #endregion Constructor
-
-        #region Private Method
-
-        private void _ExecuteSpotify()
-        {
-            if (Process.GetProcessesByName("Spotify").Length <= 0)
-                Process.Start(new ProcessStartInfo(Constants.GetSpotifyExePath(Environment.UserName)));
-        }
-
-        #endregion Private Method
 
         #region Public Method
 
         public async Task Initialize()
         {
+            if (Process.GetProcessesByName("Spotify").Length <= 0)
+                Process.Start(new ProcessStartInfo(Constants.GetSpotifyExePath(Environment.UserName)));
+
             await _spotifyAuthenticator.Initialize();
             await _spotifyAuthenticator.AuthenticationAsync();
+
+            while (!_spotifyAuthenticator.IsAuthorizationCodeReceived)
+            {
+                // wait for authorization code received response.
+                await Task.Delay(1000);
+            }
+            _spotifyClient = _spotifyAuthenticator.SpotifyClient;
+            _IUser = new User.User(_spotifyClient);
+            _IPlayer = new Player.Player(_spotifyClient);
+            _CurrentlyPlaying = await _spotifyClient?.Player.GetCurrentlyPlaying(new());
         }
 
         public bool IsExistCredentialFile() => File.Exists(Constants.TokenName);
 
         public async Task Start()
         {
-            while (!_spotifyAuthenticator.IsAuthorizationCodeReceived) 
-            {
-                // wait for authorization code received response.
-                await Task.Delay(500);
-            }
-            _spotifyClient = _spotifyAuthenticator.SpotifyClient;
-            _CurrentlyPlaying = await _spotifyClient?.Player.GetCurrentlyPlaying(new());
-
             // Get song information and subscribe with Rx.
             // Do not release duplicate information to the stream.
             Observable.Interval(TimeSpan.FromSeconds(1))
@@ -82,97 +77,43 @@ namespace Sagiri.Services.Spotify
                 .Subscribe(track => CurrentTrackChanged?.Invoke(track));
         }
 
-        public async Task<string> GetUserProfileUrl()
-        {
-            var user = await _spotifyClient?.UserProfile.Current();
-            return user.ExternalUrls.Values.First();
-        }
+        #region User Info
 
-        public async Task<string> GetUserId()
-        {
-            var user = await _spotifyClient?.UserProfile.Current();
-            return user.Id;       
-        }
+        public async Task<string> GetUserProfileUrl() => await _IUser.GetUserProfileUrl();
 
-        public async Task<string> GetUserImageUrl()
-        {
-            var user = await _spotifyClient?.UserProfile.Current();
-            var imageUrl = user.Images.Select(x => x.Url).FirstOrDefault();
-            return imageUrl;
-        }
+        public async Task<string> GetUserId() => await _IUser.GetUserId();
 
-        public async Task<MemoryStream> GetUserImageStream()
-        {
-            var user = await _spotifyClient?.UserProfile.Current();
-            var imageUrl = user.Images.Select(x => x.Url).FirstOrDefault();
-            return new MemoryStream(new WebClient().DownloadData(imageUrl));
-        }
+        public async Task<string> GetUserImageUrl() => await _IUser.GetUserImageUrl();
 
-        public async Task Play()
-        {
-            var result = await _spotifyClient?.Player.ResumePlayback();
-            if (!result) Constants.DebugLog();
-        }
+        public async Task<MemoryStream> GetUserImageStream() => await _IUser.GetUserImageStream();
 
-        public async Task Pause()
-        {
-            var result = await _spotifyClient?.Player.PausePlayback();
-            if (!result) Constants.DebugLog();
-        }
+        #endregion User Info
 
-        public async Task Resume()
-        {
-            var result = await _spotifyClient?.Player.ResumePlayback();
-            if (!result) Constants.DebugLog();
-        }
+        #region Track
 
-        public async Task Stop()
-        {
-            var result = await _spotifyClient?.Player.ResumePlayback();
-            if (!result) Constants.DebugLog();
-        }
+        public async Task Play() => await _IPlayer.Play();
 
-        public async Task Seek(int positionMs)
-        {
-            var result = await _spotifyClient?.Player.SeekTo(new (positionMs));
-            if (!result) Constants.DebugLog();
-        }
+        public async Task Pause() => await _IPlayer.Pause();
 
-        public async Task SetRepeat(int type)
-        {
-            var result = await _spotifyClient?.Player.SetRepeat(new (PlayerRepeatState.ConvertRepeatState(type)));
-            if (!result) Constants.DebugLog();
-        }
+        public async Task Resume() => await _IPlayer.Resume();
 
-        public async Task SetShuffle(bool isShuffle)
-        {
-            var result = await _spotifyClient?.Player.SetShuffle(new (isShuffle));
-            if (!result) Constants.DebugLog();
-        }
+        public async Task Stop() => await _IPlayer.Stop();
+         
+        public async Task Seek(int positionMs) => await _IPlayer.Seek(positionMs);
 
-        public async Task SetVolume(int volume)
-        {
-            var result = await _spotifyClient?.Player.SetVolume(new (volume));
-            if (!result) Constants.DebugLog();
-        }
+        public async Task SetRepeat(int type) => await _IPlayer.SetRepeat(type);
 
-        public async Task SkipNext()
-        {
-            var result = await _spotifyClient?.Player.SkipNext();
-            if (!result) Constants.DebugLog();
-        } 
+        public async Task SetShuffle(bool isShuffle) => await _IPlayer.SetShuffle(isShuffle);
 
-        public async Task SkipPrevious()
-        {
-            var result = await _spotifyClient?.Player.SkipPrevious();
-            if (!result) Constants.DebugLog();
-         }
+        public async Task SetVolume(int volume) => await _IPlayer.SetVolume(volume);
 
-        public async Task<bool> IsPlaying()
-        {
-            var result = await _spotifyClient?.Player.GetCurrentPlayback();
-            return result?.IsPlaying ?? false;
-        }
+        public async Task SkipNext() => await _IPlayer.SkipNext();
+
+        public async Task SkipPrevious() => await _IPlayer.SkipPrevious();
+
+        public async Task<bool> IsPlaying() => await _IPlayer.IsPlaying();
+
+        #endregion Track
 
         #endregion Public Method
     }
