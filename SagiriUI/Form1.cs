@@ -7,50 +7,37 @@ using System.Windows.Forms;
 
 using Sagiri.Services.Spotify;
 using Sagiri.Services.Spotify.Track;
+using Sagiri.Util.Common;
+using Sagiri.Util.Configuration;
 using SagiriUI.Properties;
+
 using Twist;
 
 namespace SagiriUI
 {
     public partial class Form1 : Form
     {
+        #region Properties
+
         private SpotifyService _SpotifyService { get; set; }
         private CurrentTrackInfo _CurrentTrackInfo { get; set; }
 
-        // TODO : Token情報の外だし
-        private static readonly string _ck = "";
-        private static readonly string _cs = "";
-        private static readonly string _at = "";
-        private static readonly string _ats = "";
+        private SpotifyCredentialConfig _SpotifyCredentialConfig { get; set; }
+        private TwitterCredentialConfig _TwitterCredentialConfig { get; set; }
 
         private Twitter _Twist { get; set; }
+        private Logger _Logger { get; set; }
         private Point _MousePoint { get; set; }
+
+        #endregion Properties
+
+        #region Constructor
 
         public Form1() => InitializeComponent();
 
-        public async void Form1_Load(object sender, EventArgs e)
-        {
-            _SpotifyService = new();
-            _CurrentTrackInfo = new CurrentTrackInfo();
-            _Twist = new Twitter(_ck, _cs, _at, _ats, new HttpClient(new HttpClientHandler()));
+        #endregion Constructor
 
-            await _SpotifyService.Initialize();
-            if (_SpotifyService.IsExistCredentialFile())
-            {
-                _SpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
-
-                await _SpotifyService.Start().ConfigureAwait(false);
-                _OnSpotifyCurrentlyPlayingChanged(_CurrentTrackInfo);
-
-                var accountImageStream = await _SpotifyService.GetUserImageStream();
-                AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
-            } 
-            else
-            {
-                MessageBox.Show("Spotify tokens file not found...");
-                this.Close();
-            }
-        }
+        #region Private Methods
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
         {
@@ -71,6 +58,7 @@ namespace SagiriUI
         {
             _CurrentTrackInfo = trackInfo;
             this.Invoke((MethodInvoker)(() => pictureBoxAlbumArt.ImageLocation = trackInfo.ArtworkUrl));
+            _Logger.WriteLog("Called OnSpotifyCurrentlyPlayingChanged", Logger.LogLevel.Info);
         }
 
         private async void NowPlayingPanel_Click(object sender, EventArgs e)
@@ -84,6 +72,14 @@ namespace SagiriUI
             using var client = new System.Net.WebClient();
             using var stream = new System.IO.MemoryStream(client.DownloadData(_CurrentTrackInfo.ArtworkUrl));
             await _Twist.UpdateWithMediaAsync(tw.ToString(), stream);
+
+            _Logger.WriteLog(
+                $"Sent Twitter is -> " +
+                $"🎵 {_CurrentTrackInfo.TrackTitle} - " +
+                $"🎙 {_CurrentTrackInfo.Artist} - " +
+                $"💿 {_CurrentTrackInfo.Album}",
+                Logger.LogLevel.Info
+            );
         }
 
         private void ClosePanel_Click(object sender, EventArgs e)
@@ -111,7 +107,8 @@ namespace SagiriUI
             }
         }
 
-        private void InfoPanel_Click(object sender, EventArgs e) => new InfoWindow(_CurrentTrackInfo).Show();
+        private void InfoPanel_Click(object sender, EventArgs e) 
+            => new InfoWindow(_CurrentTrackInfo).Show();
 
         private async void AccountPanel_Click(object sender, EventArgs e)
         {
@@ -125,8 +122,68 @@ namespace SagiriUI
             }
             catch (Exception)
             {
-                throw new Exception($"Unable to open a browser. Please manually open: {url}");
+                var message = $"Unable to open a browser. Please manually open: {url}";
+                _Logger.WriteLog(message, Logger.LogLevel.Info);
+                throw new Exception(message);
             }
         }
+
+        #endregion Private Methods
+
+        #region Public Methods
+
+        public async void Form1_Load(object sender, EventArgs e)
+        {
+            _Logger = Logger.GetInstance;
+
+            _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
+            _TwitterCredentialConfig = TwitterCredentialConfig.Instance;
+
+            _SpotifyService = new();
+            _CurrentTrackInfo = new();
+
+            if (_TwitterCredentialConfig.IsExistCredentialFile())
+            {
+                var twConfig = await _TwitterCredentialConfig.LoadCredentialAsync();
+                _Twist = new Twitter(
+                    twConfig.ConsumerKey,
+                    twConfig.ConsumerSecret,
+                    twConfig.AccessToken,
+                    twConfig.AccessTokenSecret,
+                    new HttpClient(new HttpClientHandler())
+                );
+                _Logger.WriteLog("[SagiriUI] - Finish read twitter credential info.", Logger.LogLevel.Info);
+            }
+            else
+            {
+                var message = "[SagiriUI] - Twitter tokens file not found...\r\nCan't sent now-playing twitter.";
+                MessageBox.Show(message);
+                _Logger.WriteLog(message, Logger.LogLevel.Error);
+            }
+
+            await _SpotifyService.Initialize();
+            if (_SpotifyCredentialConfig.IsExistCredentialFile())
+            {
+                _SpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
+
+                await _SpotifyService.Start().ConfigureAwait(false);
+                _OnSpotifyCurrentlyPlayingChanged(_CurrentTrackInfo);
+
+                var accountImageStream = await _SpotifyService.GetUserImageStream();
+                AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
+            } 
+            else
+            {
+                var message = "[SagiriUI] - Spotify tokens file not found...\r\nClose this app.";
+                MessageBox.Show(message);
+                _Logger.WriteLog(message, Logger.LogLevel.Fatal);
+
+                this.Close();
+            }
+
+            _Logger.WriteLog("[SagiriUI] - Finished roading Form....", Logger.LogLevel.Debug);
+        }
+
+        #endregion Public Methods
     }
 }

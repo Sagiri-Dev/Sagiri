@@ -8,6 +8,8 @@ namespace Sagiri.Services.Spotify.Track
 {
     public class CurrentTrackInfo
     {
+        #region Properties
+
         private string _ArtworkUrl { get; set; }
         private static FullTrack _CurrentTrack { get; set; }
         private static MemoryStream _ArtworkData { get; set; }
@@ -26,6 +28,10 @@ namespace Sagiri.Services.Spotify.Track
             get => _ArtworkData;
             private set => _ArtworkData = new MemoryStream(new WebClient().DownloadData(_ArtworkUrl));
         }
+
+        #endregion Properties
+
+        #region Constructor
 
         public CurrentTrackInfo(
             string trackTitle = "-", 
@@ -52,6 +58,22 @@ namespace Sagiri.Services.Spotify.Track
             _ArtworkUrl = artworkUrl;
             _ArtworkData = new MemoryStream();
         }
+
+        #endregion Constructor
+
+        #region Private Methods
+
+        private static (string, int) _GetDuration(FullTrack track)
+        {
+            var totalSec = track.DurationMs / 1000;
+            var min = totalSec / 60;
+            var sec = totalSec % 60;
+            return ($"{min:D2}:{sec:D2}", totalSec);
+        }
+
+        #endregion Private Methods
+
+        #region Internal Methods
 
         internal static CurrentTrackInfo GetCurrentTrackInfo(CurrentlyPlaying currentlyPlaying)
         {
@@ -87,12 +109,6 @@ namespace Sagiri.Services.Spotify.Track
             return currentTrackinfo;
         }
 
-        private static (string, int) _GetDuration(FullTrack track)
-        {
-            var totalSec = track.DurationMs / 1000;
-            var min = totalSec / 60;
-            var sec = totalSec % 60;
-            return ($"{min:D2}:{sec:D2}", totalSec);
-        }
+        #endregion Internal Methods
     }
 }

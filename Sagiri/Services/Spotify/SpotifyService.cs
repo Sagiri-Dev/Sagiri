@@ -42,7 +42,7 @@ namespace Sagiri.Services.Spotify
 
         #endregion Constructor
 
-        #region Public Method
+        #region Public Methods
 
         public async Task Initialize()
         {
@@ -63,13 +63,11 @@ namespace Sagiri.Services.Spotify
             _CurrentlyPlaying = await _spotifyClient?.Player.GetCurrentlyPlaying(new());
         }
 
-        public bool IsExistCredentialFile() => File.Exists(Constants.TokenName);
-
         public async Task Start()
         {
             // Get song information and subscribe with Rx.
             // Do not release duplicate information to the stream.
-            Observable.Interval(TimeSpan.FromSeconds(1))
+            Observable.Interval(TimeSpan.FromSeconds(2))
                 .Select(async _ => _CurrentlyPlaying = await _spotifyClient?.Player?.GetCurrentlyPlaying(new()))
                 .Where(_ => _CurrentlyPlaying.IsPlaying)
                 .Select(_ => CurrentTrackInfo.GetCurrentTrackInfo(_CurrentlyPlaying))
@@ -115,7 +113,7 @@ namespace Sagiri.Services.Spotify
 
         #endregion Track
 
-        #endregion Public Method
+        #endregion Public Methods
     }
 }
 

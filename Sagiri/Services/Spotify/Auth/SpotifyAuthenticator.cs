@@ -7,67 +7,104 @@ using SpotifyAPI.Web;
 using SpotifyAPI.Web.Auth;
 
 using Sagiri.Exceptions;
-using Sagiri.Util;
+using Sagiri.Util.Configuration;
 
 using static Sagiri.Util.Common.Constants;
+using Sagiri.Util.Common;
 
 namespace Sagiri.Services.Spotify.Auth
 {
+    /// <summary>
+    /// Authentication processing to access Spotify.
+    /// </summary>
     internal class SpotifyAuthenticator
     {
-        private static JsonConfig _json = new();
+        #region Properties
+
+        private static SpotifyCredentialConfig _SpotifyCredentialConfig { get; set; }
 
         private static EmbedIOAuthServer _Server { get; set; }
+        private Logger _Logger { get; set; }
+
         private string _Challenge { get; set; }
         private string _Verifier { get; set; }
 
         public SpotifyClient SpotifyClient { get; private set; }
-        public bool IsAuthorizationCodeReceived { get; private set; } = false;
+        public bool IsAuthorizationCodeReceived { get; set; } = false;
+
+        #endregion Properties
+
+        #region Constructor
 
         internal SpotifyAuthenticator()
         {
+            _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
             (_Verifier, _Challenge) = PKCEUtil.GenerateCodes(120);
+            _Logger = Logger.GetInstance;
         }
 
-        internal async Task Initialize()
-        {
-            if (!File.Exists(TokenName))
-            {
-                _json = new JsonConfig() { ClientId = ClientId, ClientSecret = ClientSecret };
-                await _json.SaveTokenAsync();
-            }
-            else
-            {
-                _json = await new JsonConfig().LoadTokenAsync();
-            }
-            await _PreAuthentication();
-        }
+        #endregion Constructor
+
+        #region Private Methods
 
         private async Task _PreAuthentication()
         {
             try
             {
                 var config = SpotifyClientConfig.CreateDefault();
-                var request = new ClientCredentialsRequest(_json.ClientId, _json.ClientSecret);
+                var request = new ClientCredentialsRequest(_SpotifyCredentialConfig.ClientId, _SpotifyCredentialConfig.ClientSecret);
                 var response = await new OAuthClient(config).RequestToken(request);
 
-                _json.AccessToken ??= response.AccessToken;
-                _json.CreatedAt = response.CreatedAt;
-                _json.IsExpired = response.IsExpired;
-                await _json.SaveTokenAsync();
+                _SpotifyCredentialConfig.AccessToken ??= response.AccessToken;
+                _SpotifyCredentialConfig.CreatedAt = response.CreatedAt;
+                _SpotifyCredentialConfig.IsExpired = response.IsExpired;
 
-                if (_json.IsNullOrEmpty())
+                await _SpotifyCredentialConfig.SaveCredentialAsync();
+
+                if (_SpotifyCredentialConfig.IsNullOrEmpty())
                     throw new Exception();
             }
             catch (Exception)
             {
-                throw new SagiriException("Configuration any records of null or empty. please check your tokens info.");
+                var logMessage = "Configuration any records of null or empty. please check your tokens info.";
+                _Logger.WriteLog($"[Sagiri] - {logMessage}", Logger.LogLevel.Info);
+
+                throw new SagiriException(logMessage);
             }
+        }
+
+        private async Task _DisposeAsync()
+        {
+            if (_Server is not null)
+            {
+                await _Server.Stop();
+                _Server.Dispose();
+                _Server = null;
+            }
+        }
+
+        #endregion Private Methods
+
+        #region Internal Methods
+
+        internal async Task Initialize()
+        {
+            if (!File.Exists(GetCredentialFileName("spotify")))
+            {
+                _SpotifyCredentialConfig = new SpotifyCredentialConfig() { ClientId = ClientId, ClientSecret = ClientSecret };
+                await _SpotifyCredentialConfig.SaveCredentialAsync();
+            }
+            else
+            {
+                _SpotifyCredentialConfig = await new SpotifyCredentialConfig().LoadCredentialAsync();
+            }
+            await _PreAuthentication();
+            _Logger.WriteLog("[Sagiri] - Finished reading spotify credential info.", Logger.LogLevel.Info);
         }
 
         internal async Task AuthenticationAsync()
         {
-            Debug.WriteLine("Started the Spotify authorization process...");
+            _Logger.WriteLog("[Sagiri] - Started spotify authorization process...", Logger.LogLevel.Info);
 
             _Server = new EmbedIOAuthServer(RedirectUri, PortNo);
             await _Server.Start();
@@ -77,15 +114,16 @@ namespace Sagiri.Services.Spotify.Auth
                 await _DisposeAsync();
 
                 OAuthClient client = new();
-                var tokenResponse = await client.RequestToken(new PKCETokenRequest(_json.ClientId, response.Code, RedirectUri, _Verifier));
-                PKCEAuthenticator authenticator = new(_json.ClientId, tokenResponse);
+                var tokenResponse = await client.RequestToken(new PKCETokenRequest(_SpotifyCredentialConfig.ClientId, response.Code, RedirectUri, _Verifier));
+                PKCEAuthenticator authenticator = new(_SpotifyCredentialConfig.ClientId, tokenResponse);
 
                 var config = SpotifyClientConfig.CreateDefault().WithAuthenticator(authenticator);
                 IsAuthorizationCodeReceived = true;
                 SpotifyClient = new SpotifyClient(config);
+                _Logger.WriteLog("[Sagiri] - Finished spotify authorization process!", Logger.LogLevel.Info);
             };
 
-            var loginRequest = new LoginRequest(_Server.BaseUri, _json.ClientId, LoginRequest.ResponseType.Code)
+            var loginRequest = new LoginRequest(_Server.BaseUri, _SpotifyCredentialConfig.ClientId, LoginRequest.ResponseType.Code)
             {
                 CodeChallengeMethod = "S256",
                 CodeChallenge = _Challenge,
@@ -109,14 +147,6 @@ namespace Sagiri.Services.Spotify.Auth
             }
         }
 
-        private async Task _DisposeAsync()
-        {
-            if (_Server is not null)
-            {
-                await _Server.Stop();
-                _Server.Dispose();
-                _Server = null;
-            }
-        }
+        #endregion Internal Methods
     }
 }

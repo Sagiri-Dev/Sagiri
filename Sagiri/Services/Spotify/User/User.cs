@@ -11,9 +11,19 @@ namespace Sagiri.Services.Spotify.User
 {
     internal class User : IUser
     {
+        #region Properties
+
         private SpotifyClient _SpotifyClient { get; set; }
 
+        #endregion Properties
+
+        #region Constructor
+
         internal User(SpotifyClient spotifyClient) => _SpotifyClient = spotifyClient;
+
+        #endregion Constructor
+
+        #region Public Interface Methods
 
         async Task<string> IUser.GetUserId()
         {
@@ -40,5 +50,7 @@ namespace Sagiri.Services.Spotify.User
             var user = await _SpotifyClient?.UserProfile.Current();
             return user.ExternalUrls.Values.First();
         }
+
+        #endregion Public Methods
     }
 }
