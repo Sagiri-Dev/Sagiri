@@ -7,8 +7,8 @@ Let's enjoy!
 ### ○Features
 
 * ✅ Supports posting current track information at Twitter.
-* ✅ Supports `.NET 5.
-* ❌ Logging supported.
+* ✅ Supports `.NET 5. (feature -> .NET 6:-D )
+* ✅ Logging supported.
 * ❌ Spotify Control Module UI fixed.
 
 ### ○Capture Images
@@ -36,7 +36,7 @@ public async void Form1_Load(object sender, EventArgs e)
     SpotifyService spotifyService = new();
     var currentTrackInfo = new CurrentTrackInfo();
 
-    // registar for callback function (gettting currentTrackInfo.) 
+    // registar for callback function (getting currentTrackInfo.) 
     spotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
 
     if (spotifyService.IsExistCredentialFile())
