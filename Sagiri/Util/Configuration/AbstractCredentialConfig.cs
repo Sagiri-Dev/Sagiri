@@ -96,7 +96,7 @@ namespace Sagiri.Util.Configuration
         /// <summary>
         /// Child classes menber check null or empty.
         /// </summary>
-        /// <returns> null or emply -> true / false </returns>
+        /// <returns> null or empty -> true / false </returns>
         public abstract bool IsNullOrEmpty();
 
         #endregion Public Abstract Methods
