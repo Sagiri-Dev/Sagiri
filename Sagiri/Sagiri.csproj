@@ -1,17 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <Authors>Asteriskx.</Authors>
-    <Copyright>Copyright. 2021 @Astrisk_</Copyright>
+    <Copyright>Copyright. 2021-2022. @Astrisk_</Copyright>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <Platforms>AnyCPU;x64</Platforms>
+    <IsPublishable>True</IsPublishable>
+    <PackageLicenseFile>D:\Repository\Sagiri\LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SpotifyAPI.Web" Version="6.2.0" />
-    <PackageReference Include="SpotifyAPI.Web.Auth" Version="6.2.0" />
+    <PackageReference Include="SpotifyAPI.Web" Version="6.2.2" />
+    <PackageReference Include="SpotifyAPI.Web.Auth" Version="6.2.2" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 

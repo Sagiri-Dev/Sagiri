@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
@@ -69,9 +70,10 @@ namespace SagiriUI
             tw.Append($"💿 {_CurrentTrackInfo.Album}\r\n");
             tw.Append("#nowplaying #Spotify #Sagiri");
 
-            using var client = new System.Net.WebClient();
-            using var stream = new System.IO.MemoryStream(client.DownloadData(_CurrentTrackInfo.ArtworkUrl));
-            await _Twist.UpdateWithMediaAsync(tw.ToString(), stream);
+            using var httpClient = new HttpClient(new HttpClientHandler());
+            var byteStream = await httpClient.GetByteArrayAsync(_CurrentTrackInfo.ArtworkUrl);
+            using var artworkStream = new MemoryStream(byteStream);
+            await _Twist.UpdateWithMediaAsync(tw.ToString(), artworkStream);
 
             _Logger.WriteLog(
                 $"Sent Twitter is -> " +
