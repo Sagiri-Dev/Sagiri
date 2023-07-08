@@ -46,7 +46,7 @@ namespace Sagiri.Services.Spotify.Auth
 
         #region Private Methods
 
-        private async Task _PreAuthentication()
+        private async Task<bool> _PreAuthentication()
         {
             try
             {
@@ -62,13 +62,15 @@ namespace Sagiri.Services.Spotify.Auth
 
                 if (_SpotifyCredentialConfig.IsNullOrEmpty())
                     throw new Exception();
+
+                return true;
             }
             catch (Exception)
             {
                 var logMessage = "Configuration any records of null or empty. please check your tokens info.";
-                _Logger.WriteLog($"[Sagiri] - {logMessage}", Logger.LogLevel.Info);
+                _Logger.WriteLog($"[Sagiri] - {logMessage}", Logger.LogLevel.Fatal);
 
-                throw new SagiriException(logMessage);
+                return false;
             }
         }
 
@@ -86,7 +88,7 @@ namespace Sagiri.Services.Spotify.Auth
 
         #region Internal Methods
 
-        internal async Task Initialize()
+        internal async Task<bool> InitializeAsync()
         {
             if (!File.Exists(GetCredentialFileName("spotify")))
             {
@@ -100,8 +102,11 @@ namespace Sagiri.Services.Spotify.Auth
             {
                 _SpotifyCredentialConfig = await new SpotifyCredentialConfig().LoadCredentialAsync();
             }
-            await _PreAuthentication();
+
+            var initalizeStatus = await _PreAuthentication();
             _Logger.WriteLog("[Sagiri] - Finished reading spotify credential info.", Logger.LogLevel.Info);
+
+            return initalizeStatus;
         }
 
         internal async Task AuthenticationAsync()
@@ -145,6 +150,7 @@ namespace Sagiri.Services.Spotify.Auth
             }
             catch (Exception)
             {
+                _Logger.WriteLog($"[Sagiri] - Unable to open a browser.  Please manually open: {uri}", Logger.LogLevel.Error);
                 throw new SagiriException($"Unable to open a browser.  Please manually open: {uri}");
             }
         }

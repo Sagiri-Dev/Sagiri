@@ -10,7 +10,7 @@ namespace Sagiri.Services.Misskey.Interfaces
         /// 
         /// </summary>
         /// <returns></returns>
-        ValueTask InitializeAsync();
+        ValueTask<bool> InitializeAsync();
 
         /// <summary>
         /// このユーザーからAPIにリクエストします。

@@ -55,6 +55,7 @@ namespace SagiriUI
             this.pictureBoxAlbumArt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxAlbumArt.TabIndex = 8;
             this.pictureBoxAlbumArt.TabStop = false;
+            this.pictureBoxAlbumArt.Click += new System.EventHandler(this.pictureBoxAlbumArt_Click);
             // 
             // SeparatePanel
             // 

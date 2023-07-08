@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
@@ -58,15 +57,12 @@ namespace Sagiri.Services.Spotify
 
         #region Public Methods
 
-        async ValueTask<SpotifyService> ISpotifyService.BuildSpotifyServiceAsync()
+        async ValueTask<bool> ISpotifyService.InitializeAsync()
         {
-            //await this._initialize();
-            return this;
-        }
+            var canInitialized = await _spotifyAuthenticator.InitializeAsync();
+            if (!canInitialized)
+                return false;
 
-        async ValueTask ISpotifyService.InitializeAsync()
-        {
-            await _spotifyAuthenticator.Initialize();
             await _spotifyAuthenticator.AuthenticationAsync();
 
             while (!_spotifyAuthenticator.IsAuthorizationCodeReceived)
@@ -79,6 +75,8 @@ namespace Sagiri.Services.Spotify
             _IUser = new User.User(_spotifyClient);
             _IPlayer = new Player.Player(_spotifyClient);
             _CurrentlyPlaying = await _spotifyClient?.Player.GetCurrentlyPlaying(new());
+
+            return true;
         }
 
         async ValueTask ISpotifyService.StartAsync(CancellationToken ct)
@@ -152,9 +150,9 @@ namespace Sagiri.Services.Spotify
 
         void ISpotifyService.Dispose()
         {
-            _spotifyAuthenticator.Dispose();
-            _IUser.Dispose();
-            _IPlayer.Dispose();
+            _spotifyAuthenticator?.Dispose();
+            _IUser?.Dispose();
+            _IPlayer?.Dispose();
 
             _CurrentlyPlaying = null;
             _spotifyClient = null;

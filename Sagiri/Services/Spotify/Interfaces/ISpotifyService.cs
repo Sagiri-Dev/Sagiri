@@ -12,9 +12,7 @@ namespace Sagiri.Services.Spotify.Interfaces
         event Action<CurrentTrackInfo> CurrentTrackChanged;
         event Action CurrentTrackErrorDetected;
 
-        ValueTask<SpotifyService> BuildSpotifyServiceAsync();
-
-        ValueTask InitializeAsync();
+        ValueTask<bool> InitializeAsync();
 
         ValueTask StartAsync(CancellationToken ct);
 

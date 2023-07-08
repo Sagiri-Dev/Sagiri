@@ -18,6 +18,11 @@ using SagiriUI.Properties;
 using SagiriUI.Controls;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using System.Diagnostics.CodeAnalysis;
+using System.Drawing.Imaging;
+using System.Windows.Interop;
 
 namespace SagiriUI
 {
@@ -54,41 +59,44 @@ namespace SagiriUI
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-            _IMisskeyService = new MisskeyService();
-            await _IMisskeyService.InitializeAsync();
-
-            _ISpotifyService = new SpotifyService();
-            _CurrentTrackInfo = new();
-            _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
-
             _Logger = Logger.GetInstance;
 
-            await _ISpotifyService.InitializeAsync();
-            if (_SpotifyCredentialConfig.IsExistCredentialFile())
+            if (!File.Exists("spotify.json") || !File.Exists("misskey.json"))
+                _CheckClosingApp(errorType: "file", title: "File not found!", message: "");
+
+            _CurrentTrackInfo = new();
+            _ISpotifyService = new SpotifyService();
+            _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
+
+            var spCanInitialized = await _ISpotifyService.InitializeAsync();
+            if (!spCanInitialized)
             {
-                _ISpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
-                _ISpotifyService.CurrentTrackErrorDetected += _OnSpotifyCurrentTrackErrorDetected;
-
-                await _ISpotifyService.StartAsync(_CancellationSource.Token).ConfigureAwait(false);
-
-                var accountImageStream = await _ISpotifyService.GetUserImageStream();
-                AccountPanel.BackgroundImage = System.Drawing.Image.FromStream(accountImageStream) ?? Resources.account;
+                var msg = "[SagiriUI] - Spotify token is an invalid value or empty...";
+                _CheckClosingApp(errorType: "token", title: "Token info an invalid!", message: msg);
             }
-            else
+
+            _IMisskeyService = new MisskeyService();
+            var miCanInitalized = await _IMisskeyService.InitializeAsync();
+            if (!miCanInitalized)
             {
-                var message = "[SagiriUI] - Spotify tokens file not found...\r\nClose this app.";
-                MessageBox.Show(message);
-                _Logger.WriteLog(message, Logger.LogLevel.Fatal);
-
-                this.Close();
+                var msg = "Misskey token or Host(URL) is an invalid value or empty...";
+                _CheckClosingApp(errorType: "token", title: "Token info an invalid!", message: msg);
             }
+
+            _ISpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
+            _ISpotifyService.CurrentTrackErrorDetected += _OnSpotifyCurrentTrackErrorDetected;
+
+            await _ISpotifyService.StartAsync(_CancellationSource.Token).ConfigureAwait(false);
+
+            var accountImageStream = await _ISpotifyService.GetUserImageStream();
+            AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
 
             _Logger.WriteLog("[SagiriUI] - Finished roading Form....", Logger.LogLevel.Info);
         }
 
         private void Form1_Closing(object sender, EventArgs e)
         {
-            _ISpotifyService.Dispose();
+            _ISpotifyService?.Dispose();
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
@@ -104,6 +112,29 @@ namespace SagiriUI
                 this.Left += e.X - _MousePoint.X;
                 this.Top += e.Y - _MousePoint.Y;
             }
+        }
+
+        private void _CheckClosingApp(string errorType, string title, string message = "")
+        {
+            if (errorType is "file")
+            {
+                if (!File.Exists("spotify.json"))
+                    MessageBox.Show("spotify.json file not found...", title);
+
+                if (!File.Exists("misskey.json"))
+                    MessageBox.Show("misskey.json file not found...", title);
+
+                _Logger.WriteLog("token file not found...", Logger.LogLevel.Fatal);
+            }
+            else
+            {
+                MessageBox.Show(message, title);
+                _Logger.WriteLog(message, Logger.LogLevel.Fatal);
+            }
+
+            MessageBox.Show("Close this app.", "Close App!");
+            this.Close();
+            return;
         }
 
         private void _OnSpotifyCurrentTrackErrorDetected()
@@ -129,10 +160,31 @@ namespace SagiriUI
             if (trackInfo.TrackTitle == _TrackTitleOld && trackInfo.Artist == _ArtistOld)
                 return;
 
-            _TrackTitleOld = trackInfo.TrackTitle;
-            _ArtistOld = trackInfo.Artist;
+            #region Saving AlbumArt
+
+            // Saving Current AlbumArt
+            _ = Task.Factory.StartNew(async () =>
+            {
+                if (trackInfo.TrackTitle == _TrackTitleOld && trackInfo.Artist == _ArtistOld)
+                    return;
+                _TrackTitleOld = trackInfo.TrackTitle;
+                _ArtistOld = trackInfo.Artist;
+
+                using HttpClient httpClient = new(new HttpClientHandler());
+                var byteStream = await httpClient.GetByteArrayAsync(trackInfo.ArtworkUrl);
+                if (byteStream.Length == _ByteStreamLengthOld)
+                    return;
+                _ByteStreamLengthOld = byteStream.Length;
+
+                var saveName = "cover.jpg";
+                using MemoryStream ms = new(byteStream);
+                Bitmap bmp = new(ms);
+                bmp.Save(saveName);
+            });
 
             this._NotifyToastCurrentTrackInfo(trackInfo);
+
+            #endregion Saving AlbumArt
 
             #region Logging
 
@@ -227,6 +279,17 @@ namespace SagiriUI
             {
                 this.Close();
             }
+        }
+
+        private void pictureBoxAlbumArt_Click(object sender, EventArgs e)
+        {
+            if (!File.Exists("cover.jpg"))
+                return;
+
+            var p = new Process(){
+                StartInfo = new ProcessStartInfo(@"cover.jpg") { UseShellExecute = true }
+            };
+            p.Start();
         }
 
         private void InfoPanel_Click(object sender, EventArgs e) =>

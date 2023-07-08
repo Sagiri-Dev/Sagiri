@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Sagiri.Exceptions;
 using Sagiri.Services.Misskey.Interfaces;
 using Sagiri.Util.Common;
 using Sagiri.Util.Configuration;
@@ -42,24 +43,27 @@ namespace Sagiri.Services.Misskey
 
         #region Public Methods
 
-        async ValueTask IMisskeyService.InitializeAsync()
+        async ValueTask<bool> IMisskeyService.InitializeAsync()
         {
-            if (!File.Exists(GetCredentialFileName("misskey")))
+            try
             {
-                _MisskeyCredentialConfig = new MisskeyCredentialConfig()
-                {
-                    Token = default,
-                    Host = "https://misskey.io/"
-                };
-                await _MisskeyCredentialConfig.SaveCredentialAsync();
-            }
-            else
-            {
+                // ここに来るまでにファイルがあることは確定するので、ファイル有無チェックはしない。
                 _MisskeyCredentialConfig = await new MisskeyCredentialConfig().LoadCredentialAsync();
+
+                if (_MisskeyCredentialConfig.IsNullOrEmpty())
+                    throw new SagiriException();
+
                 _AccessToken = _MisskeyCredentialConfig?.Token;
                 _Host = _MisskeyCredentialConfig?.Host;
+
+                _Logger.WriteLog("[Sagiri - MisskeyService] - Finished reading misskey credential info.", Logger.LogLevel.Info);
+                return true;
             }
-            _Logger.WriteLog("[Sagiri] - Finished reading misskey credential info.", Logger.LogLevel.Info);
+            catch (Exception)
+            {
+                _Logger.WriteLog("[Sagiri - MisskeyService] - Failed reading credential info...", Logger.LogLevel.Error);
+                return false;
+            }
         }
 
         /// <summary>
