@@ -6,10 +6,11 @@ Let's enjoy!
 
 ### ○Features
 
-* ✅ Supports posting current track information at Twitter.
-* ✅ Supports `.NET 5. (feature -> .NET 6:-D )
+* ✅ Supports posting current track information at Misskey.
+* ✅ Supports .NET 7.
 * ✅ Logging supported.
 * ❌ Spotify Control Module UI fixed.
+* ❌ Supports posting current track information at Twitter(API-Dead...).
 
 ### ○Capture Images
 
@@ -33,23 +34,35 @@ using Sagiri.Services.Spotify.Track;
 
 public async void Form1_Load(object sender, EventArgs e)
 {
-    SpotifyService spotifyService = new();
-    var currentTrackInfo = new CurrentTrackInfo();
+    _IMisskeyService = new MisskeyService();
+    await _IMisskeyService.InitializeAsync();
 
-    // registar for callback function (getting currentTrackInfo.) 
-    spotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
+    _ISpotifyService = new SpotifyService();
+    _CurrentTrackInfo = new();
+    _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
 
-    if (spotifyService.IsExistCredentialFile())
+    _Logger = Logger.GetInstance;
+
+    await _ISpotifyService.InitializeAsync();
+    if (_SpotifyCredentialConfig.IsExistCredentialFile())
     {
-        await spotifyService.Initialize();
-        await spotifyService.Start().ConfigureAwait(false);
+        _ISpotifyService.CurrentTrackChanged += _OnSpotifyCurrentlyPlayingChanged;
+        _ISpotifyService.CurrentTrackErrorDetected += _OnSpotifyCurrentTrackErrorDetected;
+
+        await _ISpotifyService.StartAsync(_CancellationSource.Token).ConfigureAwait(false);
+
+        var accountImageStream = await _ISpotifyService.GetUserImageStream();
+        AccountPanel.BackgroundImage = System.Drawing.Image.FromStream(accountImageStream) ?? Resources.account;
+    }
+    else
+    {
+        var message = "[SagiriUI] - Spotify tokens file not found...\r\nClose this app.";
+        MessageBox.Show(message);
+        _Logger.WriteLog(message, Logger.LogLevel.Fatal);
+
+        this.Close();
     }
 
-    // Be sure to explicitly initialize.
-    _OnSpotifyCurrentlyPlayingChanged(_CurrentTrackInfo);
-
-    // Getting and Setting Spotify current playing track albumart. 
-    var accountImageStream = await spotifyService.GetUserImageStream();
-    AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
+    _Logger.WriteLog("[SagiriUI] - Finished roading Form....", Logger.LogLevel.Info);
 }
 ```
