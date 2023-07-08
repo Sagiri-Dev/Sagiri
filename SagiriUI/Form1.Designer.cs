@@ -34,14 +34,13 @@ namespace SagiriUI
             this.pictureBoxAlbumArt = new System.Windows.Forms.PictureBox();
             this.SeparatePanel = new System.Windows.Forms.Panel();
             this.TitlePanel = new System.Windows.Forms.Panel();
+            this.MisskeyPostPanel = new System.Windows.Forms.Panel();
             this.InfoPanel = new System.Windows.Forms.Panel();
             this.AccountPanel = new System.Windows.Forms.Panel();
-            this.NowPlayingPanel = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.ClosePanel = new System.Windows.Forms.Panel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
-            this.MisskeyPostPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlbumArt)).BeginInit();
             this.TitlePanel.SuspendLayout();
             this.SuspendLayout();
@@ -49,10 +48,10 @@ namespace SagiriUI
             // pictureBoxAlbumArt
             // 
             this.pictureBoxAlbumArt.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pictureBoxAlbumArt.Location = new System.Drawing.Point(0, 28);
-            this.pictureBoxAlbumArt.Margin = new System.Windows.Forms.Padding(4);
+            this.pictureBoxAlbumArt.Location = new System.Drawing.Point(0, 37);
+            this.pictureBoxAlbumArt.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.pictureBoxAlbumArt.Name = "pictureBoxAlbumArt";
-            this.pictureBoxAlbumArt.Size = new System.Drawing.Size(200, 200);
+            this.pictureBoxAlbumArt.Size = new System.Drawing.Size(229, 267);
             this.pictureBoxAlbumArt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxAlbumArt.TabIndex = 8;
             this.pictureBoxAlbumArt.TabStop = false;
@@ -62,10 +61,10 @@ namespace SagiriUI
             this.SeparatePanel.BackColor = System.Drawing.Color.White;
             this.SeparatePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SeparatePanel.ForeColor = System.Drawing.Color.White;
-            this.SeparatePanel.Location = new System.Drawing.Point(50, 7);
-            this.SeparatePanel.Margin = new System.Windows.Forms.Padding(4);
+            this.SeparatePanel.Location = new System.Drawing.Point(57, 9);
+            this.SeparatePanel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.SeparatePanel.Name = "SeparatePanel";
-            this.SeparatePanel.Size = new System.Drawing.Size(1, 16);
+            this.SeparatePanel.Size = new System.Drawing.Size(1, 21);
             this.SeparatePanel.TabIndex = 1;
             // 
             // TitlePanel
@@ -74,24 +73,37 @@ namespace SagiriUI
             this.TitlePanel.Controls.Add(this.MisskeyPostPanel);
             this.TitlePanel.Controls.Add(this.InfoPanel);
             this.TitlePanel.Controls.Add(this.AccountPanel);
-            this.TitlePanel.Controls.Add(this.NowPlayingPanel);
             this.TitlePanel.Controls.Add(this.label1);
             this.TitlePanel.Controls.Add(this.ClosePanel);
             this.TitlePanel.Controls.Add(this.SeparatePanel);
             this.TitlePanel.Location = new System.Drawing.Point(0, 0);
+            this.TitlePanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.TitlePanel.Name = "TitlePanel";
-            this.TitlePanel.Size = new System.Drawing.Size(200, 28);
+            this.TitlePanel.Size = new System.Drawing.Size(229, 37);
             this.TitlePanel.TabIndex = 14;
             this.TitlePanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.TitlePanel_MouseDown);
             this.TitlePanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.TitlePanel_MouseMove);
+            // 
+            // MisskeyPostPanel
+            // 
+            this.MisskeyPostPanel.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("MisskeyPostPanel.BackgroundImage")));
+            this.MisskeyPostPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.MisskeyPostPanel.Location = new System.Drawing.Point(94, 7);
+            this.MisskeyPostPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.MisskeyPostPanel.Name = "MisskeyPostPanel";
+            this.MisskeyPostPanel.Size = new System.Drawing.Size(21, 24);
+            this.MisskeyPostPanel.TabIndex = 17;
+            this.toolTip1.SetToolTip(this.MisskeyPostPanel, "Post with Misskey.");
+            this.MisskeyPostPanel.Click += new System.EventHandler(this.MisskeyPostPanel_Click);
             // 
             // InfoPanel
             // 
             this.InfoPanel.BackgroundImage = global::SagiriUI.Properties.Resources.info;
             this.InfoPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.InfoPanel.Location = new System.Drawing.Point(151, 5);
+            this.InfoPanel.Location = new System.Drawing.Point(173, 7);
+            this.InfoPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.InfoPanel.Name = "InfoPanel";
-            this.InfoPanel.Size = new System.Drawing.Size(18, 18);
+            this.InfoPanel.Size = new System.Drawing.Size(21, 24);
             this.InfoPanel.TabIndex = 18;
             this.toolTip1.SetToolTip(this.InfoPanel, "NowPlaying Info.");
             this.InfoPanel.Click += new System.EventHandler(this.InfoPanel_Click);
@@ -100,31 +112,21 @@ namespace SagiriUI
             // 
             this.AccountPanel.BackgroundImage = global::SagiriUI.Properties.Resources.account;
             this.AccountPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.AccountPanel.Location = new System.Drawing.Point(59, 5);
+            this.AccountPanel.Location = new System.Drawing.Point(67, 7);
+            this.AccountPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.AccountPanel.Name = "AccountPanel";
-            this.AccountPanel.Size = new System.Drawing.Size(18, 18);
+            this.AccountPanel.Size = new System.Drawing.Size(21, 24);
             this.AccountPanel.TabIndex = 17;
             this.toolTip1.SetToolTip(this.AccountPanel, "Account for Spotify.");
             this.AccountPanel.Click += new System.EventHandler(this.AccountPanel_Click);
-            // 
-            // NowPlayingPanel
-            // 
-            this.NowPlayingPanel.BackgroundImage = global::SagiriUI.Properties.Resources.send;
-            this.NowPlayingPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.NowPlayingPanel.Location = new System.Drawing.Point(84, 5);
-            this.NowPlayingPanel.Name = "NowPlayingPanel";
-            this.NowPlayingPanel.Size = new System.Drawing.Size(18, 18);
-            this.NowPlayingPanel.TabIndex = 16;
-            this.toolTip1.SetToolTip(this.NowPlayingPanel, "Post with Twitter.");
-            this.NowPlayingPanel.Click += new System.EventHandler(this.NowPlayingPanel_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(9, 6);
+            this.label1.Location = new System.Drawing.Point(10, 8);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(36, 15);
+            this.label1.Size = new System.Drawing.Size(47, 20);
             this.label1.TabIndex = 15;
             this.label1.Text = "Sagiri";
             // 
@@ -132,9 +134,10 @@ namespace SagiriUI
             // 
             this.ClosePanel.BackgroundImage = global::SagiriUI.Properties.Resources.close;
             this.ClosePanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.ClosePanel.Location = new System.Drawing.Point(175, 4);
+            this.ClosePanel.Location = new System.Drawing.Point(200, 5);
+            this.ClosePanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.ClosePanel.Name = "ClosePanel";
-            this.ClosePanel.Size = new System.Drawing.Size(20, 20);
+            this.ClosePanel.Size = new System.Drawing.Size(23, 27);
             this.ClosePanel.TabIndex = 15;
             this.toolTip1.SetToolTip(this.ClosePanel, "Close App.");
             this.ClosePanel.Click += new System.EventHandler(this.ClosePanel_Click);
@@ -144,27 +147,16 @@ namespace SagiriUI
             this.notifyIcon.Text = "notifyIcon";
             this.notifyIcon.Visible = true;
             // 
-            // MisskeyPostPanel
-            // 
-            this.MisskeyPostPanel.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("MisskeyPostPanel.BackgroundImage")));
-            this.MisskeyPostPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.MisskeyPostPanel.Location = new System.Drawing.Point(108, 5);
-            this.MisskeyPostPanel.Name = "MisskeyPostPanel";
-            this.MisskeyPostPanel.Size = new System.Drawing.Size(18, 18);
-            this.MisskeyPostPanel.TabIndex = 17;
-            this.toolTip1.SetToolTip(this.MisskeyPostPanel, "Post with Misskey.");
-            this.MisskeyPostPanel.Click += new System.EventHandler(this.MisskeyPostPanel_Click);
-            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(58)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
-            this.ClientSize = new System.Drawing.Size(200, 228);
+            this.ClientSize = new System.Drawing.Size(229, 304);
             this.Controls.Add(this.TitlePanel);
             this.Controls.Add(this.pictureBoxAlbumArt);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Spotify NowPlaying";
@@ -185,8 +177,6 @@ namespace SagiriUI
         private System.Windows.Forms.Panel TitlePanel;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Panel ClosePanel;
-        private System.Windows.Forms.Panel NowPlayingPanel;
-        private SagiriUI.Controls.BorderPanel BorderPanel;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Panel InfoPanel;
         private System.Windows.Forms.Panel AccountPanel;
