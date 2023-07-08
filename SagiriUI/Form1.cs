@@ -20,9 +20,6 @@ using Microsoft.Toolkit.Uwp.Notifications;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using System.Diagnostics.CodeAnalysis;
-using System.Drawing.Imaging;
-using System.Windows.Interop;
 
 namespace SagiriUI
 {

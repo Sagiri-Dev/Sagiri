@@ -54,7 +54,7 @@ namespace Sagiri.Services.Spotify.Auth
                 var request = new ClientCredentialsRequest(_SpotifyCredentialConfig.ClientId, _SpotifyCredentialConfig.ClientSecret);
                 var response = await new OAuthClient(config).RequestToken(request);
 
-                _SpotifyCredentialConfig.AccessToken ??= response.AccessToken;
+                //_SpotifyCredentialConfig.AccessToken ??= response.AccessToken;
                 _SpotifyCredentialConfig.CreatedAt = response.CreatedAt;
                 _SpotifyCredentialConfig.IsExpired = response.IsExpired;
 
