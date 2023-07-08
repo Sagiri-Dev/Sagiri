@@ -49,10 +49,10 @@ namespace SagiriUI
             // 
             this.pictureBoxAlbumArt.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pictureBoxAlbumArt.Location = new System.Drawing.Point(0, 37);
-            this.pictureBoxAlbumArt.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.pictureBoxAlbumArt.Margin = new System.Windows.Forms.Padding(5);
             this.pictureBoxAlbumArt.Name = "pictureBoxAlbumArt";
-            this.pictureBoxAlbumArt.Size = new System.Drawing.Size(229, 267);
-            this.pictureBoxAlbumArt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxAlbumArt.Size = new System.Drawing.Size(229, 229);
+            this.pictureBoxAlbumArt.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.pictureBoxAlbumArt.TabIndex = 8;
             this.pictureBoxAlbumArt.TabStop = false;
             // 
@@ -62,7 +62,7 @@ namespace SagiriUI
             this.SeparatePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.SeparatePanel.ForeColor = System.Drawing.Color.White;
             this.SeparatePanel.Location = new System.Drawing.Point(57, 9);
-            this.SeparatePanel.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.SeparatePanel.Margin = new System.Windows.Forms.Padding(5);
             this.SeparatePanel.Name = "SeparatePanel";
             this.SeparatePanel.Size = new System.Drawing.Size(1, 21);
             this.SeparatePanel.TabIndex = 1;
@@ -152,11 +152,11 @@ namespace SagiriUI
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(58)))), ((int)(((byte)(58)))), ((int)(((byte)(58)))));
-            this.ClientSize = new System.Drawing.Size(229, 304);
+            this.ClientSize = new System.Drawing.Size(229, 266);
             this.Controls.Add(this.TitlePanel);
             this.Controls.Add(this.pictureBoxAlbumArt);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.Margin = new System.Windows.Forms.Padding(5);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Spotify NowPlaying";
