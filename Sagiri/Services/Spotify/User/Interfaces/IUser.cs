@@ -11,6 +11,7 @@ namespace Sagiri.Services.Spotify.User.Interfaces
         Task<string> GetUserId();
         Task<string> GetUserImageUrl();
         Task<MemoryStream> GetUserImageStream();
+        void Dispose();
 
         #endregion Interface Method
     }

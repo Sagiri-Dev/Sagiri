@@ -30,6 +30,7 @@ namespace SagiriUI
 		private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.pictureBoxAlbumArt = new System.Windows.Forms.PictureBox();
             this.SeparatePanel = new System.Windows.Forms.Panel();
             this.TitlePanel = new System.Windows.Forms.Panel();
@@ -38,8 +39,9 @@ namespace SagiriUI
             this.NowPlayingPanel = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
             this.ClosePanel = new System.Windows.Forms.Panel();
-            this.BorderPanel = new SagiriUI.Controls.BorderPanel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.MisskeyPostPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlbumArt)).BeginInit();
             this.TitlePanel.SuspendLayout();
             this.SuspendLayout();
@@ -59,7 +61,6 @@ namespace SagiriUI
             // 
             this.SeparatePanel.BackColor = System.Drawing.Color.White;
             this.SeparatePanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.SeparatePanel.Cursor = System.Windows.Forms.Cursors.Default;
             this.SeparatePanel.ForeColor = System.Drawing.Color.White;
             this.SeparatePanel.Location = new System.Drawing.Point(50, 7);
             this.SeparatePanel.Margin = new System.Windows.Forms.Padding(4);
@@ -70,6 +71,7 @@ namespace SagiriUI
             // TitlePanel
             // 
             this.TitlePanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(160)))), ((int)(((byte)(112)))));
+            this.TitlePanel.Controls.Add(this.MisskeyPostPanel);
             this.TitlePanel.Controls.Add(this.InfoPanel);
             this.TitlePanel.Controls.Add(this.AccountPanel);
             this.TitlePanel.Controls.Add(this.NowPlayingPanel);
@@ -137,13 +139,21 @@ namespace SagiriUI
             this.toolTip1.SetToolTip(this.ClosePanel, "Close App.");
             this.ClosePanel.Click += new System.EventHandler(this.ClosePanel_Click);
             // 
-            // BorderPanel
+            // notifyIcon
             // 
-            this.BorderPanel.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(160)))), ((int)(((byte)(112)))));
-            this.BorderPanel.Location = new System.Drawing.Point(0, 0);
-            this.BorderPanel.Name = "BorderPanel";
-            this.BorderPanel.Size = new System.Drawing.Size(200, 228);
-            this.BorderPanel.TabIndex = 15;
+            this.notifyIcon.Text = "notifyIcon";
+            this.notifyIcon.Visible = true;
+            // 
+            // MisskeyPostPanel
+            // 
+            this.MisskeyPostPanel.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("MisskeyPostPanel.BackgroundImage")));
+            this.MisskeyPostPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.MisskeyPostPanel.Location = new System.Drawing.Point(108, 5);
+            this.MisskeyPostPanel.Name = "MisskeyPostPanel";
+            this.MisskeyPostPanel.Size = new System.Drawing.Size(18, 18);
+            this.MisskeyPostPanel.TabIndex = 17;
+            this.toolTip1.SetToolTip(this.MisskeyPostPanel, "Post with Misskey.");
+            this.MisskeyPostPanel.Click += new System.EventHandler(this.MisskeyPostPanel_Click);
             // 
             // Form1
             // 
@@ -153,12 +163,12 @@ namespace SagiriUI
             this.ClientSize = new System.Drawing.Size(200, 228);
             this.Controls.Add(this.TitlePanel);
             this.Controls.Add(this.pictureBoxAlbumArt);
-            this.Controls.Add(this.BorderPanel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Spotify NowPlaying";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_Closing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
@@ -180,6 +190,8 @@ namespace SagiriUI
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Panel InfoPanel;
         private System.Windows.Forms.Panel AccountPanel;
+        private System.Windows.Forms.NotifyIcon notifyIcon;
+        private System.Windows.Forms.Panel MisskeyPostPanel;
     }
 }
 

@@ -1,11 +1,11 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 using SpotifyAPI.Web;
 
 using Sagiri.Services.Spotify.User.Interfaces;
+using System.Net.Http;
 
 namespace Sagiri.Services.Spotify.User
 {
@@ -35,7 +35,8 @@ namespace Sagiri.Services.Spotify.User
         {
             var user = await _SpotifyClient?.UserProfile.Current();
             var imageUrl = user.Images.Select(x => x.Url).FirstOrDefault();
-            return new MemoryStream(new WebClient().DownloadData(imageUrl));
+            var userImageStream = await new HttpClient(new HttpClientHandler()).GetByteArrayAsync(imageUrl);
+            return new MemoryStream(userImageStream);
         }
 
         async Task<string> IUser.GetUserImageUrl()
@@ -49,6 +50,11 @@ namespace Sagiri.Services.Spotify.User
         {
             var user = await _SpotifyClient?.UserProfile.Current();
             return user.ExternalUrls.Values.First();
+        }
+
+        void IUser.Dispose()
+        {
+            _SpotifyClient = null;
         }
 
         #endregion Public Methods

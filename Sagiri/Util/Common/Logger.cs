@@ -9,7 +9,7 @@ namespace Sagiri.Util.Common
     /// <summary>
     /// Logger
     /// </summary>
-    public class Logger
+    public class Logger : IDisposable
     {
         #region Field Variable
 
@@ -118,11 +118,8 @@ namespace Sagiri.Util.Common
         {
             try
             {
-                var logString = _CreateLogString(logMessage, logLevel);
                 if (!Directory.Exists(LogFileDirectory))
-                {
                     Directory.CreateDirectory(LogFileDirectory);
-                }
 
                 if (_CanWriteLog(logLevel))
                 {
@@ -131,16 +128,23 @@ namespace Sagiri.Util.Common
                         Convert.ToBoolean(LogWriteMode == LogWriteModeType.Append),
                         Encoding.GetEncoding(Encode)
                     );
+
+                    var logString = _CreateLogString(logMessage, logLevel);
                     stream.Write(logString);
                 }
 
                 return true;
             }
-            catch
+            catch (Exception)
             {
                 System.Diagnostics.Debug.WriteLine("############ Logger WriteLog Failed... ###############");
                 return false;
             }
+        }
+
+        public void Dispose()
+        {
+            
         }
 
         #endregion Public Methods

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -17,7 +16,7 @@ namespace Sagiri.Services.Spotify.Auth
     /// <summary>
     /// Authentication processing to access Spotify.
     /// </summary>
-    internal class SpotifyAuthenticator
+    internal class SpotifyAuthenticator : IDisposable
     {
         #region Properties
 
@@ -91,7 +90,10 @@ namespace Sagiri.Services.Spotify.Auth
         {
             if (!File.Exists(GetCredentialFileName("spotify")))
             {
-                _SpotifyCredentialConfig = new SpotifyCredentialConfig() { ClientId = ClientId, ClientSecret = ClientSecret };
+                _SpotifyCredentialConfig = new SpotifyCredentialConfig() { 
+                    ClientId = ClientId, 
+                    ClientSecret = ClientSecret 
+                };
                 await _SpotifyCredentialConfig.SaveCredentialAsync();
             }
             else
@@ -127,10 +129,10 @@ namespace Sagiri.Services.Spotify.Auth
             {
                 CodeChallengeMethod = "S256",
                 CodeChallenge = _Challenge,
-                Scope = new[] { 
-                    Scopes.AppRemoteControl, 
+                Scope = new[] {
+                    Scopes.AppRemoteControl,
                     Scopes.UserModifyPlaybackState,
-                    Scopes.UserReadCurrentlyPlaying, 
+                    Scopes.UserReadCurrentlyPlaying,
                     Scopes.UserReadPlaybackState,
                     Scopes.UserReadRecentlyPlayed
                 }
@@ -145,6 +147,13 @@ namespace Sagiri.Services.Spotify.Auth
             {
                 throw new SagiriException($"Unable to open a browser.  Please manually open: {uri}");
             }
+        }
+
+        public void Dispose()
+        {
+            SpotifyClient = null;
+            _Logger = null;
+            _SpotifyCredentialConfig = null;
         }
 
         #endregion Internal Methods

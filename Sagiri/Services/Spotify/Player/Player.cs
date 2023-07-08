@@ -6,6 +6,7 @@ using Sagiri.Services.Spotify.Player.Interfaces;
 using Sagiri.Util.Common;
 using Sagiri.Services.Spotify.Player.Enum;
 using System.Reflection;
+using System;
 
 namespace Sagiri.Services.Spotify.Player
 {
@@ -90,6 +91,12 @@ namespace Sagiri.Services.Spotify.Player
         {
             var result = await _SpotifyClient?.Player.GetCurrentPlayback();
             return result?.IsPlaying ?? false;
+        }
+
+        void IPlayer.Dispose()
+        {
+            _SpotifyClient = null;
+            _Logger = null;
         }
 
         #endregion Interface Methods

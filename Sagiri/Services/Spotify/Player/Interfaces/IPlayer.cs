@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Sagiri.Services.Spotify.Player.Interfaces
 {
@@ -15,5 +16,6 @@ namespace Sagiri.Services.Spotify.Player.Interfaces
         Task SkipNext();
         Task SkipPrevious();
         Task<bool> IsPlaying();
+        void Dispose();
     }
 }
