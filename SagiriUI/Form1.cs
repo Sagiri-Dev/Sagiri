@@ -65,6 +65,7 @@ namespace SagiriUI
             await _IMisskeyService.InitializeAsync();
 
             _ISpotifyService = new SpotifyService();
+            _ISagiriSelenium = new SagiriSelenium.SagiriSelenium();
             _CurrentTrackInfo = new();
 
             _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
@@ -245,8 +246,6 @@ namespace SagiriUI
             var tw = new StringBuilder();
             tw.Append($"{_CurrentTrackInfo.TrackTitle} - {_CurrentTrackInfo.Artist} ");
             tw.Append("#nowplaying #Sagiri");
-
-            _ISagiriSelenium = new SagiriSelenium.SagiriSelenium();
 
             // $@"https://twitter.com/intent/tweet?text={tw.ToString()}" is Dropped
             var canPost = await _ISagiriSelenium.RunSeleniumAndPrePostTwitterAsync(@"https://twitter.com/", tw.ToString());
