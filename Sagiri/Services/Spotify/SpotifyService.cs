@@ -66,9 +66,6 @@ namespace Sagiri.Services.Spotify
 
         async ValueTask ISpotifyService.InitializeAsync()
         {
-            if (Process.GetProcessesByName("Spotify").Length <= 0)
-                Process.Start(new ProcessStartInfo(Constants.GetSpotifyExePath(Environment.UserName)));
-
             await _spotifyAuthenticator.Initialize();
             await _spotifyAuthenticator.AuthenticationAsync();
 
