@@ -7,7 +7,7 @@ namespace Sagiri.Services.Misskey.Interfaces
     public interface IMisskeyService
     {
         /// <summary>
-        /// 
+        /// 初期化
         /// </summary>
         /// <returns></returns>
         ValueTask<bool> InitializeAsync();
@@ -27,5 +27,10 @@ namespace Sagiri.Services.Misskey.Interfaces
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
         ValueTask<dynamic> RequestWithBinaryAsync(string endpoint, MultipartFormDataContent ps);
+
+        /// <summary>
+        /// 後始末
+        /// </summary>
+        void Dispose();
     }
 }

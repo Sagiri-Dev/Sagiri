@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using Sagiri.Services.Misskey;
@@ -12,14 +15,10 @@ using Sagiri.Services.Spotify;
 using Sagiri.Services.Spotify.Interfaces;
 using Sagiri.Services.Spotify.Track;
 using Sagiri.Util.Common;
-using Sagiri.Util.Configuration;
+using SagiriUI.Controls;
 using SagiriUI.Properties;
 
-using SagiriUI.Controls;
 using Microsoft.Toolkit.Uwp.Notifications;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace SagiriUI
 {
@@ -30,8 +29,6 @@ namespace SagiriUI
         private ISpotifyService _ISpotifyService { get; set; }
         private IMisskeyService? _IMisskeyService { get; set; }
         private CurrentTrackInfo _CurrentTrackInfo { get; set; }
-
-        private SpotifyCredentialConfig _SpotifyCredentialConfig { get; set; }
 
         private Logger _Logger { get; set; }
         private Point _MousePoint { get; set; }
@@ -61,9 +58,8 @@ namespace SagiriUI
             if (!File.Exists("spotify.json") || !File.Exists("misskey.json"))
                 _CheckClosingApp(errorType: "file", title: "File not found!", message: "");
 
-            _CurrentTrackInfo = new();
             _ISpotifyService = new SpotifyService();
-            _SpotifyCredentialConfig = SpotifyCredentialConfig.Instance;
+            _CurrentTrackInfo = new();
 
             var spCanInitialized = await _ISpotifyService.InitializeAsync();
             if (!spCanInitialized)
@@ -94,6 +90,7 @@ namespace SagiriUI
         private void Form1_Closing(object sender, EventArgs e)
         {
             _ISpotifyService?.Dispose();
+            _IMisskeyService?.Dispose();
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
@@ -237,7 +234,7 @@ namespace SagiriUI
             ps.Add("mediaIds", new string[] { file.id });
             _ = await _IMisskeyService.RequestAsync("notes/create", ps);
 
-            new MessageBoxEx(note.ToString(), "投稿完了！", 3000).Show();
+            new MessageBoxEx(note.ToString(), "投稿完了！", 2000).Show();
 
             #region Logging
 

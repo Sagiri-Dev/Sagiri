@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,8 +8,6 @@ using Sagiri.Exceptions;
 using Sagiri.Services.Misskey.Interfaces;
 using Sagiri.Util.Common;
 using Sagiri.Util.Configuration;
-
-using static Sagiri.Util.Common.Constants;
 
 namespace Sagiri.Services.Misskey
 {
@@ -43,6 +40,10 @@ namespace Sagiri.Services.Misskey
 
         #region Public Methods
 
+        /// <summary>
+        /// 初期化
+        /// </summary>
+        /// <returns></returns>
         async ValueTask<bool> IMisskeyService.InitializeAsync()
         {
             try
@@ -75,7 +76,8 @@ namespace Sagiri.Services.Misskey
         async ValueTask<dynamic> IMisskeyService.RequestAsync(string endpoint, Dictionary<string, object?> ps)
         {
             ps.Add("i", _AccessToken);
-            return await _RequestAsync(_Host, endpoint, ps);
+            var host = new Uri(_Host).ToString();
+            return await _RequestAsync(host, endpoint, ps);
         }
 
         /// <summary>
@@ -87,7 +89,18 @@ namespace Sagiri.Services.Misskey
         async ValueTask<dynamic> IMisskeyService.RequestWithBinaryAsync(string endpoint, MultipartFormDataContent ps)
         {
             ps.Add(new StringContent(_AccessToken), "i");
-            return await _RequestWithBinaryAsync(_Host, endpoint, ps);
+            var host = new Uri(_Host).ToString();
+            return await _RequestWithBinaryAsync(host, endpoint, ps);
+        }
+
+        /// <summary>
+        /// 後始末
+        /// </summary>
+        void IMisskeyService.Dispose()
+        {
+            _Client.Value?.Dispose();
+            _Logger = null;
+            _MisskeyCredentialConfig = null;
         }
 
         #endregion Public Methods
@@ -105,7 +118,7 @@ namespace Sagiri.Services.Misskey
         {
             var client = _Client.Value;
 
-            var ep = $"{host}/api/{endpoint}";
+            var ep = $"{host}api/{endpoint}";
 
             var content = new StringContent(
                 JsonConvert.SerializeObject(ps),
@@ -132,7 +145,7 @@ namespace Sagiri.Services.Misskey
         {
             var client = _Client.Value;
 
-            var ep = $"{host}/api/{endpoint}";
+            var ep = $"{host}api/{endpoint}";
 
             var res = await client.PostAsync(ep, ps);
 
