@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -73,7 +74,7 @@ namespace Sagiri.Services.Misskey
         /// <param name="endpoint">エンドポイント名</param>
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
-        async ValueTask<dynamic> IMisskeyService.RequestAsync(string endpoint, Dictionary<string, object?> ps)
+        async ValueTask<(dynamic, bool)> IMisskeyService.RequestAsync(string endpoint, Dictionary<string, object?> ps)
         {
             ps.Add("i", _AccessToken);
             var host = new Uri(_Host).ToString();
@@ -86,7 +87,7 @@ namespace Sagiri.Services.Misskey
         /// <param name="endpoint">エンドポイント名</param>
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
-        async ValueTask<dynamic> IMisskeyService.RequestWithBinaryAsync(string endpoint, MultipartFormDataContent ps)
+        async ValueTask<(dynamic, bool)> IMisskeyService.RequestWithBinaryAsync(string endpoint, MultipartFormDataContent ps)
         {
             ps.Add(new StringContent(_AccessToken), "i");
             var host = new Uri(_Host).ToString();
@@ -114,24 +115,33 @@ namespace Sagiri.Services.Misskey
         /// <param name="endpoint">エンドポイント名</param>
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
-        private async ValueTask<dynamic> _RequestAsync(string? host, string endpoint, Dictionary<string, object?> ps)
+        private async ValueTask<(dynamic, bool)> _RequestAsync(string? host, string endpoint, Dictionary<string, object?> ps)
         {
-            var client = _Client.Value;
+            try
+            {
+                var client = _Client.Value;
 
-            var ep = $"{host}api/{endpoint}";
+                var ep = $"{host}api/{endpoint}";
 
-            var content = new StringContent(
-                JsonConvert.SerializeObject(ps),
-                Encoding.UTF8, "application/json"
-            );
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(ps),
+                    Encoding.UTF8, "application/json"
+                );
 
-            var res = await client.PostAsync(ep, content);
+                var res = await client.PostAsync(ep, content);
 
-            var obj = JsonConvert.DeserializeObject<dynamic>(
-                await res.Content.ReadAsStringAsync()
-            );
+                var obj = JsonConvert.DeserializeObject<dynamic>(
+                    await res.Content.ReadAsStringAsync()
+                );
 
-            return obj;
+                return (obj, true);
+            }
+            catch (Exception ex)
+                when (ex is HttpRequestException || ex is SocketException)
+            {
+                _Logger.WriteLog("[Sagiri - MisskeyService] _RequestAsync - Failed HttpRequest...", Logger.LogLevel.Error);
+            }
+            return (default!, false);
         }
 
         /// <summary>
@@ -141,19 +151,28 @@ namespace Sagiri.Services.Misskey
         /// <param name="endpoint">エンドポイント名</param>
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
-        private async ValueTask<dynamic> _RequestWithBinaryAsync(string? host, string endpoint, MultipartFormDataContent ps)
+        private async ValueTask<(dynamic, bool)> _RequestWithBinaryAsync(string? host, string endpoint, MultipartFormDataContent ps)
         {
-            var client = _Client.Value;
+            try
+            {
+                var client = _Client.Value;
 
-            var ep = $"{host}api/{endpoint}";
+                var ep = $"{host}api/{endpoint}";
 
-            var res = await client.PostAsync(ep, ps);
+                var res = await client.PostAsync(ep, ps);
 
-            var obj = JsonConvert.DeserializeObject<dynamic>(
-                await res.Content.ReadAsStringAsync()
-            );
+                var obj = JsonConvert.DeserializeObject<dynamic>(
+                    await res.Content.ReadAsStringAsync()
+                );
 
-            return obj;
+                return (obj, true);
+            }
+            catch (Exception ex)
+                when (ex is HttpRequestException || ex is SocketException)
+            {
+                _Logger.WriteLog("[Sagiri - MisskeyService] _RequestWithBinaryAsync - Failed HttpRequest...", Logger.LogLevel.Error);
+            }
+            return (default!, false);
         }
 
         #endregion Private Methods

@@ -18,7 +18,7 @@ namespace Sagiri.Services.Misskey.Interfaces
         /// <param name="endpoint">エンドポイント名</param>
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
-        ValueTask<dynamic> RequestAsync(string endpoint, Dictionary<string, object?> ps);
+        ValueTask<(dynamic, bool)> RequestAsync(string endpoint, Dictionary<string, object?> ps);
 
         /// <summary>
         /// このユーザーからAPIにリクエストします。
@@ -26,7 +26,7 @@ namespace Sagiri.Services.Misskey.Interfaces
         /// <param name="endpoint">エンドポイント名</param>
         /// <param name="ps">パラメーター</param>
         /// <returns>レスポンス</returns>
-        ValueTask<dynamic> RequestWithBinaryAsync(string endpoint, MultipartFormDataContent ps);
+        ValueTask<(dynamic, bool)> RequestWithBinaryAsync(string endpoint, MultipartFormDataContent ps);
 
         /// <summary>
         /// 後始末

@@ -230,11 +230,24 @@ namespace SagiriUI
                 { new ByteArrayContent(byteStream), "file", "cover.jpg" }
             };
 
-            var file = await _IMisskeyService.RequestWithBinaryAsync("drive/files/create", form);
-            ps.Add("mediaIds", new string[] { file.id });
-            _ = await _IMisskeyService.RequestAsync("notes/create", ps);
+            var (file, isUploadCompleted) = await _IMisskeyService.RequestWithBinaryAsync("drive/files/create", form);
+            if (!isUploadCompleted)
+            {
+                new MessageBoxEx("Misskeyへの画像アップロードに失敗しました。\r\n画像なしの投稿に切り替えます。", "アップロード失敗:-(", 2000).Show();
+                _Logger.WriteLog($"Misskeyへの画像アップロードに失敗 - 画像なし投稿モード", Logger.LogLevel.Error);
+            }
+            else
+                ps.Add("mediaIds", new string[] { file.id });
 
-            new MessageBoxEx(note.ToString(), "投稿完了！", 2000).Show();
+            var (_, isNotePosted) = await _IMisskeyService.RequestAsync("notes/create", ps);
+            if (!isNotePosted)
+            {
+                new MessageBoxEx("Misskeyへの投稿に失敗しました。\r\n少し時間を置いて再度投稿してください。", "投稿失敗:-(", 2000).Show();
+                _Logger.WriteLog($"Misskeyへの投稿に失敗", Logger.LogLevel.Error);
+                return;
+            }
+
+            new MessageBoxEx(note.ToString(), "投稿完了:-)", 2000).Show();
 
             #region Logging
 
