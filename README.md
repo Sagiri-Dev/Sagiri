@@ -20,6 +20,9 @@ Let's enjoy!
 * InfoWindow  
 ![Sagiri-InfoWindow](Sagiri-InfoWindow.png)
 
+* SettingWindow  
+![Sagiri-SettingWindow](Sagiri-SettingWindow.png)
+
 ### ○Docs and Usage
 
 ```csharp

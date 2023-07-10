@@ -28,14 +28,10 @@ namespace SagiriUI
 
         private void SettingWindow_Load(object sender, EventArgs e)
         {
-            buttonOk.BackColor = Color.FromArgb(58, 58, 58);
-
             this.MouseDown += (_, e) => _OnMouseDownEvent(e);
             this.MouseMove += (_, e) => _OnMouseMoveEvent(e);
             TitlePanel.MouseDown += (_, e) => _OnMouseDownEvent(e);
             TitlePanel.MouseMove += (_, e) => _OnMouseMoveEvent(e);
-            //BorderPanel.MouseDown += (_, e) => _OnMouseDownEvent(e);
-            //BorderPanel.MouseMove += (_, e) => _OnMouseMoveEvent(e);
 
             this.textBoxPostingFormat.Text = this.SettingSource.PostingFormat;
 
