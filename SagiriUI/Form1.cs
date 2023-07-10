@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -17,6 +16,7 @@ using Sagiri.Services.Spotify.Track;
 using Sagiri.Util.Common;
 using SagiriUI.Controls;
 using SagiriUI.Properties;
+using SagiriUI.Settings;
 
 using Microsoft.Toolkit.Uwp.Notifications;
 
@@ -30,16 +30,16 @@ namespace SagiriUI
         private IMisskeyService? _IMisskeyService { get; set; }
         private CurrentTrackInfo _CurrentTrackInfo { get; set; }
 
+        private SettingJsonFile _Setting { get; set; }
         private Logger _Logger { get; set; }
         private Point _MousePoint { get; set; }
 
+        private static Lazy<HttpClient> _Client { get; set; } = new();
         private CancellationTokenSource _CancellationSource { get; set; } = new();
 
         private string _TrackTitleOld { get; set; } = default!;
         private string _ArtistOld { get; set; } = default!;
         private int _ByteStreamLengthOld { get; set; } = default!;
-
-        private static Lazy<HttpClient> _Client { get; set; } = new();
 
         #endregion Properties
 
@@ -83,6 +83,8 @@ namespace SagiriUI
 
             var accountImageStream = await _ISpotifyService.GetUserImageStream();
             AccountPanel.BackgroundImage = Image.FromStream(accountImageStream) ?? Resources.account;
+
+            _Setting = await SettingJsonFile.LoadAsync();
 
             _Logger.WriteLog("[SagiriUI] - Finished roading Form....", Logger.LogLevel.Info);
         }
@@ -196,33 +198,26 @@ namespace SagiriUI
 
         private void _NotifyToastCurrentTrackInfo(CurrentTrackInfo trackInfo)
         {
-            StringBuilder sb = new();
-            sb.Append($"title: {_CurrentTrackInfo.TrackTitle}\r\n");
-            sb.Append($"Artist: {_CurrentTrackInfo.Artist}\r\n");
-            sb.Append($"Album: {_CurrentTrackInfo.Album}\r\n");
+            var viewText = Helper.GenerateTrackText(_Setting.PostingFormat, trackInfo);
 
             // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
             new ToastContentBuilder()
                 .AddArgument("action", "viewConversation")
                 .AddArgument("conversationId", 9813)
                 .AddText("Sagiri-NowPlaying🎵")
-                .AddText(sb.ToString())
+                .AddText(viewText)
                 //.AddInlineImage(new Uri(trackInfo.ArtworkUrl))
                 .Show();
         }
 
         private async void MisskeyPostPanel_Click(object sender, EventArgs e)
         {
-            var note = new StringBuilder();
-            note.Append($"🎵 {_CurrentTrackInfo.TrackTitle}\r\n");
-            note.Append($"🎙 {_CurrentTrackInfo.Artist}\r\n");
-            note.Append($"💿 {_CurrentTrackInfo.Album}\r\n");
-            note.Append("#nowplaying #Spotify #Sagiri");
-
             var client = _Client.Value;
+            var postText = Helper.GenerateTrackText(_Setting.PostingFormat, _CurrentTrackInfo);
+
             var byteStream = await client.GetByteArrayAsync(_CurrentTrackInfo.ArtworkUrl);
             var ps = new Dictionary<string, object> {
-                { "text", note.ToString() },
+                { "text", postText },
                 { "visibility", "home" }
             };
 
@@ -247,7 +242,7 @@ namespace SagiriUI
                 return;
             }
 
-            new MessageBoxEx(note.ToString(), "投稿完了:-)", 2000).Show();
+            new MessageBoxEx(postText, "投稿完了:-)", 2000).Show();
 
             #region Logging
 
@@ -283,9 +278,7 @@ namespace SagiriUI
         private void ClosePanel_Click(object sender, EventArgs e)
         {
             if (!this.IsDisposed && !this.Disposing)
-            {
                 this.Close();
-            }
         }
 
         private void pictureBoxAlbumArt_Click(object sender, EventArgs e)
@@ -302,12 +295,18 @@ namespace SagiriUI
         private void InfoPanel_Click(object sender, EventArgs e) =>
             new InfoWindow(_CurrentTrackInfo).Show();
 
+        private async void settingPanel_Click(object sender, EventArgs e)
+        {
+            var settingWindow = new SettingWindow(_Setting);
+
+            if (settingWindow.ShowDialog() == DialogResult.OK)
+                await this._Setting.SaveAsync();
+        }
+
         private void TitlePanel_MouseDown(object sender, MouseEventArgs e)
         {
             if ((e.Button & MouseButtons.Left) == MouseButtons.Left)
-            {
                 _MousePoint = new Point(e.X, e.Y);
-            }
         }
 
         private void TitlePanel_MouseMove(object sender, MouseEventArgs e)

@@ -41,6 +41,7 @@ namespace SagiriUI
             this.ClosePanel = new System.Windows.Forms.Panel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.settingPanel = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAlbumArt)).BeginInit();
             this.TitlePanel.SuspendLayout();
             this.SuspendLayout();
@@ -71,6 +72,7 @@ namespace SagiriUI
             // TitlePanel
             // 
             this.TitlePanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(160)))), ((int)(((byte)(112)))));
+            this.TitlePanel.Controls.Add(this.settingPanel);
             this.TitlePanel.Controls.Add(this.MisskeyPostPanel);
             this.TitlePanel.Controls.Add(this.InfoPanel);
             this.TitlePanel.Controls.Add(this.AccountPanel);
@@ -148,6 +150,18 @@ namespace SagiriUI
             this.notifyIcon.Text = "notifyIcon";
             this.notifyIcon.Visible = true;
             // 
+            // settingPanel
+            // 
+            this.settingPanel.BackgroundImage = global::SagiriUI.Properties.Resources.settings1;
+            this.settingPanel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.settingPanel.Location = new System.Drawing.Point(146, 7);
+            this.settingPanel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.settingPanel.Name = "settingPanel";
+            this.settingPanel.Size = new System.Drawing.Size(21, 24);
+            this.settingPanel.TabIndex = 19;
+            this.toolTip1.SetToolTip(this.settingPanel, "settings.");
+            this.settingPanel.Click += new System.EventHandler(this.settingPanel_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -183,6 +197,7 @@ namespace SagiriUI
         private System.Windows.Forms.Panel AccountPanel;
         private System.Windows.Forms.NotifyIcon notifyIcon;
         private System.Windows.Forms.Panel MisskeyPostPanel;
+        private System.Windows.Forms.Panel settingPanel;
     }
 }
 
