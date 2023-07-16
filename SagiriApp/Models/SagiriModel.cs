@@ -254,7 +254,7 @@ namespace SagiriApp.Models
                 $"🎵 {trackInfo.TrackTitle} - " +
                 $"🎙 {trackInfo.Artist} - " +
                 $"💿 {trackInfo.Album}",
-                Logger.LogLevel.Info
+                Logger.LogLevel.Debug
             );
 
             #endregion Logging

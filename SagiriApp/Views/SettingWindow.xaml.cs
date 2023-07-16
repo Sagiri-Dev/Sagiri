@@ -1,6 +1,6 @@
 ﻿using System;
-
 using MahApps.Metro.Controls;
+using SagiriApp.Interop;
 
 namespace SagiriApp.Views
 {
@@ -15,7 +15,13 @@ namespace SagiriApp.Views
         public SettingWindow()
         {
             InitializeComponent();
+
             this.Closing += (_, e) => { e.Cancel = true; this.Hide(); };
+
+            this.Loaded += (_, _) => {
+                if (Helper.GetActiveWindow is SettingWindow sw)
+                    sw.PreviewText.Text = Helper.RenderPreview(sw.PostingFormatText.Text);
+            };
 
             // Must be Relation SagiriViewModel.
             var mainWindow = (MainWindow)App.Current.MainWindow;

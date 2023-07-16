@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
 using Microsoft.Xaml.Behaviors;
 
-using Sagiri.Services.Spotify.Track;
-using Sagiri.Util.Common;
 using SagiriApp.Interop;
 using SagiriApp.Views;
 
@@ -14,7 +11,6 @@ namespace SagiriApp.Behavior
 {
     class PostingFormatTextBehavior : Behavior<TextBox>
     {
-        private Logger _Logger { get; set; } = Logger.GetInstance;
         public string PostingFormat
         {
             get => (string)GetValue(PostingFormatProperty);
@@ -45,16 +41,12 @@ namespace SagiriApp.Behavior
 
         private void _OnTextChanged(object sender, EventArgs e)
         {
-            var activeWindow = Application.Current.Windows
-                .OfType<Window>()
-                .SingleOrDefault(x => x.IsActive);
-
-            if (activeWindow is SettingWindow sw)
+            if (Helper.GetActiveWindow is SettingWindow sw)
             {
                 try
                 {
                     PostingFormat = sw.PostingFormatText.Text;
-                    sw.PreviewText.Text = _RenderPreview(sw);
+                    sw.PreviewText.Text = Helper.RenderPreview(sw.PostingFormatText.Text);
                     sw.SettingSave.IsEnabled = true;
                 }
                 catch
@@ -63,20 +55,6 @@ namespace SagiriApp.Behavior
                     sw.SettingSave.IsEnabled = false;
                 }
             }
-        }
-
-        private string _RenderPreview(SettingWindow sw)
-        {
-            CurrentTrackInfo trackInfo = new()
-            {
-                Album = "メルト 10th ANNIVERSARY MIX",
-                Artist = "ryo (supercell) - やなぎなぎ",
-                TrackTitle = "メルト 10th ANNIVERSARY MIX",
-                TrackNumber = "1",
-                ReleaseDate = "2017/12/24",
-            };
-
-            return Helper.GenerateTrackText(sw.PostingFormatText.Text, trackInfo);
         }
     }
 }
