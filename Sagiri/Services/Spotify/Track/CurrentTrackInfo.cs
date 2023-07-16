@@ -17,6 +17,7 @@ namespace Sagiri.Services.Spotify.Track
         public string ArtworkUrl { get; set; }
         public string ReleaseDate { get; set; }
         public string PreviewUrl { get; set; }
+        public bool IsPlaying { get; set; }
 
         #endregion Properties
 
@@ -32,7 +33,8 @@ namespace Sagiri.Services.Spotify.Track
             string album = "-", 
             string artworkUrl = "",
             string releaseDate = "1900/1/1",
-            string previewUrl = "")
+            string previewUrl = "",
+            bool isPlaying = false)
         {
             TrackTitle = trackTitle;
             TrackNumber = trackNumber;
@@ -44,6 +46,7 @@ namespace Sagiri.Services.Spotify.Track
             ArtworkUrl = artworkUrl;
             ReleaseDate = releaseDate;
             PreviewUrl = previewUrl;
+            IsPlaying = isPlaying;
         }
 
         #endregion Constructor
@@ -77,6 +80,7 @@ namespace Sagiri.Services.Spotify.Track
                 var artworkUrl = track.Album.Images.Select(x => x.Url).FirstOrDefault();
                 var releaseDate = track.Album.ReleaseDate;
                 var previewUrl = track.PreviewUrl;
+                var isPlaying = currentlyPlaying.IsPlaying;
 
                 currentTrackInfo = new CurrentTrackInfo(
                     trackTitle: trackTitle,
@@ -88,7 +92,8 @@ namespace Sagiri.Services.Spotify.Track
                     album: album,
                     artworkUrl: artworkUrl,
                     releaseDate: releaseDate,
-                    previewUrl: previewUrl
+                    previewUrl: previewUrl,
+                    isPlaying: isPlaying
                 );
             }
             return currentTrackInfo;

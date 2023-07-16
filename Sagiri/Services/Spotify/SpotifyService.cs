@@ -13,7 +13,6 @@ using Sagiri.Services.Spotify.Player.Interfaces;
 using Sagiri.Services.Spotify.Track;
 using Sagiri.Services.Spotify.User.Interfaces;
 using Sagiri.Util.Common;
-using Sagiri.Exceptions;
 
 namespace Sagiri.Services.Spotify
 {
@@ -88,7 +87,6 @@ namespace Sagiri.Services.Spotify
                 try
                 {
                     var observer = Observable.Interval(TimeSpan.FromSeconds(1))
-                        .Where(_ => _CurrentlyPlaying is not null && _CurrentlyPlaying.IsPlaying)
                         .Select(async _ => _CurrentlyPlaying = await _spotifyClient?.Player?.GetCurrentlyPlaying(new()))
                         .Select(track => CurrentTrackInfo.GetCurrentTrackInfo(_CurrentlyPlaying))
                         .Distinct()
@@ -105,7 +103,7 @@ namespace Sagiri.Services.Spotify
                 }
                 catch (Exception ex)
                 {
-                    throw new SagiriException(ex.Message);
+                    _Logger.WriteLog($"[SpotifyService] - Polling error... {ex.Message}", Logger.LogLevel.Error);
                 }
             }, ct);
         }
