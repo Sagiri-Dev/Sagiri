@@ -49,7 +49,7 @@ namespace SagiriApp.ViewModel
 
             NowPlayingCommand = new AsyncReactiveCommand().WithSubscribe(async () => await _SagiriModel.PostMisskeyAsync()).AddTo(_cd);
             AlbumArtClickCommand.Subscribe(_ => SagiriModel.ViewAlbumArt()).AddTo(_cd);
-            SettingJsonSaveCommand.Subscribe(_ => _SagiriModel.SaveSetting());
+            SettingJsonSaveCommand.Subscribe(_ => _SagiriModel.SaveSetting()).AddTo(_cd);
         }
 
         public void Dispose() => _cd.Dispose();

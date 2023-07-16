@@ -34,7 +34,7 @@ namespace SagiriApp.Models
         private ISpotifyService _ISpotifyService { get; init; } = new SpotifyService();
         private IMisskeyService _IMisskeyService { get; init; } = new MisskeyService();
 
-        private Logger _Logger { get; init; } = Logger.GetInstance;
+        private Logger _Logger { get; set; } = Logger.GetInstance;
 
         private static Lazy<HttpClient> _Client { get; set; } = new();
         private CancellationTokenSource _CancellationSource { get; init; } = new();
@@ -65,9 +65,16 @@ namespace SagiriApp.Models
 
         public void Dispose()
         {
+            _ISpotifyService?.Dispose();
+            _IMisskeyService?.Dispose();
+            
             CurrentTrackInfo.AddTo(_cd);
             IsSpotifyPlaying.AddTo(_cd);
+            PostingFormat.AddTo(_cd);
             _cd.Dispose();
+
+            _CancellationSource?.Dispose();
+            _Logger = null; 
         }
 
         #endregion Public Methods
@@ -258,7 +265,7 @@ namespace SagiriApp.Models
             MessageBox.Show("Spotify CurrentTrackError...", "Sagiri-NowPlaying Closed...");
             _Logger.WriteLog("Spotify CurrentTrackError...", Logger.LogLevel.Error);
 
-            _ISpotifyService.Dispose();
+            _ISpotifyService?.Dispose();
         }
 
         private void _NotifyErrorCredentialInfo(string errorType, string title, string message = "")
