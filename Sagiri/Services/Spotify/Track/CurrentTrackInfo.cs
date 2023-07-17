@@ -1,11 +1,16 @@
 ﻿using System.Linq;
+using System.Text;
+using Sagiri.Util.Common;
 using SpotifyAPI.Web;
+using static SpotifyAPI.Web.PlaylistRemoveItemsRequest;
 
 namespace Sagiri.Services.Spotify.Track
 {
     public class CurrentTrackInfo
     {
         #region Properties
+
+        private static Logger _Logger = Logger.GetInstance;
 
         public string TrackTitle { get; set; }
         public string TrackNumber { get; set; }
@@ -75,7 +80,22 @@ namespace Sagiri.Services.Spotify.Track
                 var trackId = track.Album.Id;
 
                 (string trackDuration, int trackRawDuration) = _GetDuration(track);
-                var artist = track.Artists.Select(x => x.Name).FirstOrDefault();
+                
+                var artists = track.Artists.Select(x => x.Name);
+                StringBuilder sb = new();
+                foreach (var (item, index) in artists.Select((item, index) => (item, index)))
+                {
+                    if (artists.Count() > 1)
+                    {
+                        if (index != artists.Count() - 1)
+                            sb.Append($"{item}, ");
+                        else
+                            sb.Append($"{item}");
+                    }
+                    else
+                        sb.Append(item);
+                }
+
                 var album = track.Album.Name;
                 var artworkUrl = track.Album.Images.Select(x => x.Url).FirstOrDefault();
                 var releaseDate = track.Album.ReleaseDate;
@@ -88,7 +108,7 @@ namespace Sagiri.Services.Spotify.Track
                     trackId: trackId,
                     trackDuration: trackDuration,
                     trackRawDuration: trackRawDuration,
-                    artist: artist,
+                    artist: sb.ToString(),
                     album: album,
                     artworkUrl: artworkUrl,
                     releaseDate: releaseDate,
