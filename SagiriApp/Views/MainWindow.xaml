@@ -1,7 +1,6 @@
 ﻿<mah:MetroWindow x:Class="SagiriApp.Views.MainWindow"
         xmlns:local="clr-namespace:SagiriApp"
         xmlns:viewmodel="clr-namespace:SagiriApp.ViewModel"
-        xmlns:intl="clr-namespace:SagiriApp.Interop"
         xmlns:sgrBh="clr-namespace:SagiriApp.Behavior"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -59,6 +58,17 @@
     </mah:MetroWindow.RightWindowCommands>
 
     <Grid>
+        <!-- Waiting -->
+        <mah:ProgressRing
+            Width="50" Height="15" Margin="0, 0, 0, 40"
+            HorizontalAlignment="Center" VerticalAlignment="Center"
+            Foreground="MediumSeaGreen"
+            IsActive="{qc:Binding '!$P', P={Binding IsSpotifyPlaying.Value}}"/>
+
+        <Label x:Name="WaitLabel" Content="Please Authentication to Spotify." FontSize="16" Foreground="MediumSeaGreen"
+               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 0, 0, -60"
+               IsEnabled="{qc:Binding '!$P', P={Binding IsSpotifyPlaying.Value}}"/>
+
         <!-- AlbumArt -->
         <Image x:Name ="AlbumArt" Source="{Binding CurrentTrackInfo.Value.ArtworkUrl, TargetNullValue={x:Null}}" Stretch="Uniform">
             <bh:Interaction.Triggers>
