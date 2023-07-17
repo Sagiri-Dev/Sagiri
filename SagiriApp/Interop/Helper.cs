@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Windows;
+using Microsoft.Toolkit.Uwp.Notifications;
 using Sagiri.Services.Spotify.Track;
 
 namespace SagiriApp.Interop
@@ -40,6 +41,19 @@ namespace SagiriApp.Interop
             };
 
             return GenerateTrackText(text, trackInfo);
+        }
+
+        internal static void NotifyToastCurrentTrackInfo(string format, CurrentTrackInfo trackInfo)
+        {
+            var notifyText = GenerateTrackText(format, trackInfo);
+
+            // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
+            new ToastContentBuilder()
+                .AddArgument("action", "viewConversation")
+                .AddArgument("conversationId", 9813)
+                .AddText("Sagiri-NowPlaying🎵")
+                .AddText(notifyText)
+                .Show();
         }
     }
 }

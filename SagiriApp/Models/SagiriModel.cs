@@ -8,7 +8,6 @@ using System.Reactive.Disposables;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Microsoft.Toolkit.Uwp.Notifications;
 
 using Prism.Mvvm;
 using Reactive.Bindings;
@@ -117,7 +116,7 @@ namespace SagiriApp.Models
             RaisePropertyChanged(nameof(PostingFormat));
             RaisePropertyChanged(nameof(IsPostAlbumArt));
 
-            _Logger.WriteLog("[SagiriApp] - Finished roading window....", Logger.LogLevel.Info);
+            _Logger.WriteLog("[SagiriApp] - Finished roading window....", Logger.LogLevel.Debug);
         }
 
         internal async ValueTask StartAsync()
@@ -251,7 +250,7 @@ namespace SagiriApp.Models
                 bmp.Save(saveName);
             });
 
-            this._NotifyToastCurrentTrackInfo(trackInfo);
+            Helper.NotifyToastCurrentTrackInfo(_Setting.PostingFormat, trackInfo);
 
             #endregion #region Saving Current AlbumArt
 
@@ -297,19 +296,6 @@ namespace SagiriApp.Models
 
             MessageBox.Show("アプリを終了し、各種認証情報を見直してください。", "認証情報エラー");
             return;
-        }
-
-        private void _NotifyToastCurrentTrackInfo(CurrentTrackInfo trackInfo)
-        {
-            var notifyText = Helper.GenerateTrackText(_Setting.PostingFormat, trackInfo);
-
-            // Requires Microsoft.Toolkit.Uwp.Notifications NuGet package version 7.0 or greater
-            new ToastContentBuilder()
-                .AddArgument("action", "viewConversation")
-                .AddArgument("conversationId", 9813)
-                .AddText("Sagiri-NowPlaying🎵")
-                .AddText(notifyText)
-                .Show();
         }
 
         #endregion Private Methods
