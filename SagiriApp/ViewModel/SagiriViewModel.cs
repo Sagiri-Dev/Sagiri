@@ -24,6 +24,7 @@ namespace SagiriApp.ViewModel
         public ReactiveProperty<CurrentTrackInfo>? CurrentTrackInfo { get; set; }
         public ReactiveProperty<bool> IsSpotifyPlaying { get; set; }
         public ReactiveProperty<string> PostingFormat { get; set; }
+        public ReactiveProperty<bool> IsPostAlbumArt { get; set; }
 
         private readonly SagiriModel _SagiriModel = new();
         private readonly CompositeDisposable _cd = new();
@@ -41,10 +42,12 @@ namespace SagiriApp.ViewModel
                 CurrentTrackInfo = _SagiriModel.ToReactivePropertyAsSynchronized(m => m.CurrentTrackInfo.Value).AddTo(_cd);
                 IsSpotifyPlaying = _SagiriModel.ToReactivePropertyAsSynchronized(m => m.IsSpotifyPlaying.Value).AddTo(_cd);
                 PostingFormat = _SagiriModel.ToReactivePropertyAsSynchronized(m => m.PostingFormat.Value).AddTo(_cd);
+                IsPostAlbumArt = _SagiriModel.ToReactivePropertyAsSynchronized(m => m.IsPostAlbumArt.Value).AddTo(_cd);
 
                 RaisePropertyChanged(nameof(CurrentTrackInfo));
                 RaisePropertyChanged(nameof(IsSpotifyPlaying));
                 RaisePropertyChanged(nameof(PostingFormat));
+                RaisePropertyChanged(nameof(IsPostAlbumArt));
             }).AddTo(_cd);
 
             NowPlayingCommand = new AsyncReactiveCommand().WithSubscribe(async () => await _SagiriModel.PostMisskeyAsync()).AddTo(_cd);

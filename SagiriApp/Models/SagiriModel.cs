@@ -44,6 +44,7 @@ namespace SagiriApp.Models
         public ReactivePropertySlim<bool> IsSpotifyPlaying { get; set; }
         public ReactivePropertySlim<CurrentTrackInfo> CurrentTrackInfo { get; set; }
         public ReactivePropertySlim<string> PostingFormat { get; set; }
+        public ReactivePropertySlim<bool> IsPostAlbumArt { get; set; }
 
         private readonly CompositeDisposable _cd = new();
 
@@ -71,6 +72,7 @@ namespace SagiriApp.Models
             CurrentTrackInfo.AddTo(_cd);
             IsSpotifyPlaying.AddTo(_cd);
             PostingFormat.AddTo(_cd);
+            IsPostAlbumArt.AddTo(_cd);
             _cd.Dispose();
 
             _CancellationSource?.Dispose();
@@ -111,7 +113,9 @@ namespace SagiriApp.Models
 
             _Setting = await _Setting.LoadAsync();
             PostingFormat = new ReactivePropertySlim<string>(_Setting.PostingFormat);
+            IsPostAlbumArt = new ReactivePropertySlim<bool>(_Setting.IsPostAlbumArt);
             RaisePropertyChanged(nameof(PostingFormat));
+            RaisePropertyChanged(nameof(IsPostAlbumArt));
 
             _Logger.WriteLog("[SagiriApp] - Finished roading window....", Logger.LogLevel.Info);
         }
@@ -154,8 +158,11 @@ namespace SagiriApp.Models
                 new MessageBoxEx("Misskeyへの画像アップロードに失敗しました。\r\n画像なしの投稿に切り替えます。", "アップロード失敗:-(", 2000).Show();
                 _Logger.WriteLog($"[SagiriApp] - Misskeyへの画像アップロードに失敗 - 画像なし投稿モード", Logger.LogLevel.Error);
             }
-            else
+            else if (IsPostAlbumArt.Value)
+            {
                 ps.Add("mediaIds", new string[] { file.id });
+            }
+            else { /* NOP */ }
 
             var (_, isNotePosted) = await _IMisskeyService.RequestAsync("notes/create", ps);
             if (!isNotePosted)
@@ -194,10 +201,12 @@ namespace SagiriApp.Models
         internal void SaveSetting()
         {
             _Setting.PostingFormat = PostingFormat.Value;
+            _Setting.IsPostAlbumArt = IsPostAlbumArt.Value;
             _Setting.SaveAsync();
-            new MessageBoxEx("投稿フォーマットを保存しました。", "投稿フォーマット保存完了！", 2000).Show();
 
-            _Logger.WriteLog($"[SagiriApp] - 投稿フォーマット保存完了！", Logger.LogLevel.Info);
+            new MessageBoxEx("設定内容を保存しました。", "設定保存完了", 2000).Show();
+
+            _Logger.WriteLog($"[SagiriApp] - 設定保存完了", Logger.LogLevel.Info);
         }
 
         #endregion Internal Methods

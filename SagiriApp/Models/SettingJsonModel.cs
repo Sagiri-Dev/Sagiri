@@ -12,6 +12,8 @@ namespace SagiriApp.Models
 
         [JsonProperty("format")]
         public string PostingFormat { get; set; }
+        [JsonProperty("isPostAlbumArt")]
+        public bool IsPostAlbumArt { get; set; } = true;
 
         public readonly string PostingFormatDefault = "\ud83c\udfb5 {Title}\r\n\ud83c\udf99 {Artist}\r\n\ud83d\udcbf {Album}\r\n#nowplaying #Spotify #Sagiri";
 

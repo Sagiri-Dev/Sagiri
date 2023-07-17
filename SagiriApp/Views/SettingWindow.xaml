@@ -15,7 +15,7 @@
         BorderThickness="1"
         Title="Settings"
         GlowBrush="MediumSeaGreen"
-        Height="470" Width="500" TitleCharacterCasing="Normal"
+        Height="500" Width="500" TitleCharacterCasing="Normal"
         WindowTitleBrush="MediumSeaGreen" NonActiveWindowTitleBrush="MediumSeaGreen" BorderBrush="MediumSeaGreen">
     <Grid>
         <StackPanel Margin="10">
@@ -41,6 +41,9 @@
                 </bh:Interaction.Behaviors>
             </TextBox>
 
+            <!-- PostAlbumArt ToggleSwitch -->
+            <mah:ToggleSwitch x:Name="PostAlbumArtToggleSwitch" Content="Post with AlbumArt." IsOn="{Binding IsPostAlbumArt.Value}" Margin="0,0,0,10" Height="28"/>
+            
             <!-- Save Button -->
             <Button x:Name="SettingSave" Content="Save" Command="{Binding SettingJsonSaveCommand}" ToolTip="Save" Margin="0,0,0,30" Height="28"/>
         </StackPanel>
