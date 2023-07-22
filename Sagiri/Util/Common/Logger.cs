@@ -142,10 +142,18 @@ namespace Sagiri.Util.Common
             }
         }
 
-        public void Dispose()
+        public void SetLogLevel(string logLevelStr) => LogOutputLevel = logLevelStr.ToLower() switch
         {
-            
-        }
+            "debug" => LogLevel.Debug,
+            "info" => LogLevel.Info,
+            "warn" => LogLevel.Warn,
+            "error" => LogLevel.Error,
+            "fatal" => LogLevel.Fatal,
+            "none" => LogLevel.None,
+            _ => LogLevel.Info
+        };
+
+        public void Dispose() { }
 
         #endregion Public Methods
     }
